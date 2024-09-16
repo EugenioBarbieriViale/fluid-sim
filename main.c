@@ -5,8 +5,9 @@
 
 
 #define N 10
-#define R 8.31
 #define radius 10
+
+#define R 8.31
 
 typedef struct {
     Vector2 pos;
@@ -14,8 +15,8 @@ typedef struct {
     Vector2 acc;
 } Particle;
 
-float rand_float() {
-    return (float)rand() / (float)RAND_MAX;
+float rand_float(float low, float high) {
+    return ((float)rand() / (float)(RAND_MAX)) * abs(low - high) + low;
 }
 
 Vector2 VectorSum(Vector2 v, Vector2 w) {
@@ -28,12 +29,24 @@ Vector2 VectorMult(Vector2 v, float scalar) {
 
 void init_gas(Particle gas[N], int X, int Y, int vmax) {
     for (int n=0; n<N; n++) {
-        gas[n].pos = (Vector2){rand_float() * X, rand_float() * Y};
-        gas[n].vel = (Vector2){rand_float() * vmax, rand_float() * vmax};
-        gas[n].acc = (Vector2){rand_float(), rand_float()};
+        gas[n].pos = (Vector2){rand_float(0,1) * (X-R) + R, rand_float(0,1) * (Y-R) + R};
+        gas[n].vel = (Vector2){rand_float(-1,1) * vmax, rand_float(-1,1) * vmax};
+        gas[n].acc = (Vector2){rand_float(-1,1), rand_float(-1,1)};
     }
 }
 
+void borders(Particle *particle, int X, int Y) {
+    if (particle->pos.x < R || particle->pos.x > X - R)
+        particle->vel.x *= -1;
+
+    if (particle->pos.y < R || particle->pos.y > Y - R)
+        particle->vel.y *= -1;
+}
+
+void collision(Particle *particle, int X, int Y) {
+    for (int i=0; i<N; i++) {
+    }
+}
 
 int main() {
     srand(time(NULL));
@@ -45,7 +58,7 @@ int main() {
     InitWindow(X, Y, "Gas Particles");
     SetTargetFPS(FPS);
 
-    const int vmax = 1e2;
+    const int vmax = 2e2;
 
     Particle gas[N];
     init_gas(gas, X, Y, vmax);
@@ -57,7 +70,9 @@ int main() {
         ClearBackground(BLACK);
 
         for (int i=0; i<N; i++) {
+            borders(&gas[i], X, Y);
             gas[i].pos = VectorSum(gas[i].pos, VectorMult(gas[i].vel, dt));
+
             DrawCircleV(gas[i].pos, radius, GRAY);
         }
 
