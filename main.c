@@ -1,3 +1,6 @@
+// TODO:
+//  - continous collision detection
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -5,13 +8,14 @@
 #include <raylib.h>
 
 
-#define N 10
-#define radius 10
+#define N 100
+#define RADIUS 10
+
+#define VMAX 1.0e2
 
 typedef struct {
     Vector2 pos;
     Vector2 vel;
-    Vector2 acc;
 } Particle;
 
 float rand_float(float low, float high) {
@@ -34,28 +38,33 @@ float VectorMagn(Vector2 v) {
     return (float)sqrt(v.x*v.x + v.y*v.y);
 }
 
-void init_gas(Particle gas[N], int X, int Y, int vmax) {
+void init_gas(Particle gas[N], int X, int Y) {
     for (int n=0; n<N; n++) {
-        gas[n].pos = (Vector2){rand_float(0,1) * (X-radius) + radius, rand_float(0,1) * (Y-radius) + radius};
-        gas[n].vel = (Vector2){rand_float(-1,1) * vmax, rand_float(-1,1) * vmax};
-        gas[n].acc = (Vector2){rand_float(-1,1), rand_float(-1,1)};
+        gas[n].pos.x = rand_float(0,1) * (X - RADIUS - 5) + RADIUS + 5;
+        gas[n].pos.y = rand_float(0,1) * (Y - RADIUS - 5) + RADIUS + 5;
+
+        gas[n].vel = (Vector2){rand_float(-1,1) * VMAX, rand_float(-1,1) * VMAX};
     }
 }
 
 void borders(Particle *particle, int X, int Y) {
-    if (particle->pos.x < radius || particle->pos.x > X - radius)
+    if (particle->pos.x < RADIUS || particle->pos.x > X - RADIUS)
         particle->vel.x *= -1;
 
-    if (particle->pos.y < radius || particle->pos.y > Y - radius)
+    if (particle->pos.y < RADIUS || particle->pos.y > Y - RADIUS)
         particle->vel.y *= -1;
 }
 
-void collision(Particle *particle, Particle gas[N]) {
+void collision(int index, Particle *particle, Particle gas[N]) {
     for (int i=0; i<N; i++) {
-        float dist = VectorMagn(VectorDiff(particle->pos, gas[i].pos));
-        if (dist <= 2*radius) {
-            particle->vel.x *= -1;
-            break;
+
+        if (i != index) {
+            float dist = VectorMagn(VectorDiff(particle->pos, gas[i].pos));
+
+            if (dist < 2*RADIUS) {
+                /* particle->vel = gas[i].vel; */
+                particle->vel.y *= -1;
+            }
         }
     }
 }
@@ -70,10 +79,8 @@ int main() {
     InitWindow(X, Y, "Gas Particles");
     SetTargetFPS(FPS);
 
-    const int vmax = 2e2;
-
     Particle gas[N];
-    init_gas(gas, X, Y, vmax);
+    init_gas(gas, X, Y);
 
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
@@ -85,9 +92,9 @@ int main() {
             gas[i].pos = VectorSum(gas[i].pos, VectorMult(gas[i].vel, dt));
 
             borders(&gas[i], X, Y);
-            collision(&gas[i], gas);
+            collision(i, &gas[i], gas);
 
-            DrawCircleV(gas[i].pos, radius, GRAY);
+            DrawCircleV(gas[i].pos, RADIUS, GRAY);
         }
 
         EndDrawing();
