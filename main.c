@@ -8,10 +8,12 @@
 #include <raylib.h>
 
 
-#define N 100
-#define RADIUS 10
+#define N 1000
+#define RADIUS 4
 
 #define VMAX 1.0e2
+
+#define square(x) ((x) * (x))
 
 typedef struct {
     Vector2 pos;
@@ -38,10 +40,16 @@ float VectorMagn(Vector2 v) {
     return (float)sqrt(v.x*v.x + v.y*v.y);
 }
 
+float VectorSquare(Vector2 v) {
+    return (float)(VectorMagn(v) * VectorMagn(v));
+}
+
 void init_gas(Particle gas[N], int X, int Y) {
+    int shift = 30;
+    
     for (int n=0; n<N; n++) {
-        gas[n].pos.x = rand_float(0,1) * (X - RADIUS - 5) + RADIUS + 5;
-        gas[n].pos.y = rand_float(0,1) * (Y - RADIUS - 5) + RADIUS + 5;
+        gas[n].pos.x = rand_float(0,1) * (X - RADIUS - shift) + shift;
+        gas[n].pos.y = rand_float(0,1) * (Y - RADIUS - shift) + shift;
 
         gas[n].vel = (Vector2){rand_float(-1,1) * VMAX, rand_float(-1,1) * VMAX};
     }
@@ -55,26 +63,12 @@ void borders(Particle *particle, int X, int Y) {
         particle->vel.y *= -1;
 }
 
-void collision(int index, Particle *particle, Particle gas[N]) {
-    for (int i=0; i<N; i++) {
-
-        if (i != index) {
-            float dist = VectorMagn(VectorDiff(particle->pos, gas[i].pos));
-
-            if (dist < 2*RADIUS) {
-                /* particle->vel = gas[i].vel; */
-                particle->vel.y *= -1;
-            }
-        }
-    }
-}
-
 int main() {
     srand(time(NULL));
 
     const int X = 1000;
     const int Y =  800;
-    const int FPS = 30;
+    const int FPS = 60;
 
     InitWindow(X, Y, "Gas Particles");
     SetTargetFPS(FPS);
@@ -84,18 +78,31 @@ int main() {
 
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
+        float vqm = 0;
+
+        Vector2 v_tot = {0,0};
+        float vqm_v = 0;
 
         BeginDrawing();
         ClearBackground(BLACK);
 
         for (int i=0; i<N; i++) {
+            borders(&gas[i], X, Y);
             gas[i].pos = VectorSum(gas[i].pos, VectorMult(gas[i].vel, dt));
 
-            borders(&gas[i], X, Y);
-            collision(i, &gas[i], gas);
+            vqm += square(VectorMagn(gas[i].vel));
+
+            v_tot = VectorSum(v_tot, gas[i].vel);
+            vqm_v = VectorSquare(v_tot);
 
             DrawCircleV(gas[i].pos, RADIUS, GRAY);
         }
+
+        vqm = sqrt(vqm / (float)N);
+        vqm_v = sqrt(vqm_v / (float)N);
+
+        /* printf("S: %f\n", vqm); */
+        printf("V: %f\n", vqm_v);
 
         EndDrawing();
     }
