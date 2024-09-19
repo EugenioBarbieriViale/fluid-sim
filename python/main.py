@@ -1,29 +1,23 @@
 import pygame, sys
-import numpy as np
-from random import randint
+from gas import Gas
 
 pygame.init()
 clock = pygame.time.Clock()
 
 X, Y = 1000, 800
+FPS = 60
 
 screen = pygame.display.set_mode([X,Y])
 
-N = 10
-n_vels = 5
-vmax = 100
+N = 1000
+R = 5
 
-def init_vels():
-    vels = []
-    for i in range(N):
-        m = randint(-n_vels, n_vels) * vmax
-        vel = pygame.math.Vector2(m)
-        vels.append(vel)
-    return vels
+n_vels = 3
+vmax = 20
 
-def init_pos():
+gas = Gas(N, R, n_vels, vmax, FPS)
 
-
+gas.init(X, Y)
 
 while True:
     for event in pygame.event.get():
@@ -33,10 +27,10 @@ while True:
 
     screen.fill((0,0,0))
 
-
+    gas.run_simulation(screen, X, Y)
 
     pygame.display.flip()
-    clock.tick(60)
+    clock.tick(FPS)
     pygame.display.update()
 
 pygame.quit()
