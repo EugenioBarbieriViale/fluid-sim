@@ -1,6 +1,3 @@
-// TODO:
-//  - continous collision detection
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -11,7 +8,14 @@
 #define N 5000
 #define RADIUS 5
 
-#define VMAX 1.0e2
+// distance from borders when particles are initialized
+#define SHIFT 15
+
+// maximum velocity of a particle
+#define VMAX 50
+
+// range of possible integer velocities (from -number to number)
+#define VEL_RANGE 5
 
 #define square(x) ((x) * (x))
 
@@ -19,10 +23,6 @@ typedef struct {
     Vector2 pos;
     Vector2 vel;
 } Particle;
-
-float rand_float(float low, float high) {
-    return ((float)rand() / (float)(RAND_MAX)) * abs(low - high) + low;
-}
 
 Vector2 VectorSum(Vector2 v, Vector2 w) {
     return (Vector2){v.x + w.x, v.y + w.y};
@@ -44,19 +44,26 @@ float VectorSquare(Vector2 v) {
     return (float)(VectorMagn(v) * VectorMagn(v));
 }
 
-float rand_poss(int n) {
-    return (rand() % n) - n*2;
+float rand_float(float low, float high) {
+    return ((float)rand() / (float)(RAND_MAX)) * abs(low - high) + low;
+}
+
+float rand_vel(void) {
+    float x;
+    for (;;) {
+        x = (rand() % (2 * VEL_RANGE)) - VEL_RANGE;
+        if (x != 0)
+            return x;
+    }
 }
 
 void init_gas(Particle gas[N], int X, int Y) {
-    int shift = 30 + RADIUS;
-    
     for (int n=0; n<N; n++) {
-        gas[n].pos.x = rand_float(0,1) * (X - shift * 2) + shift;
-        gas[n].pos.y = rand_float(0,1) * (Y - shift * 2) + shift;
+        gas[n].pos.x = rand_float(0,1) * (X - SHIFT * 2) + SHIFT;
+        gas[n].pos.y = rand_float(0,1) * (Y - SHIFT * 2) + SHIFT;
 
-        gas[n].vel = (Vector2){rand_float(-1,1) * VMAX, rand_float(-1,1) * VMAX};
-        /* gas[n].vel = (Vector2){rand_poss(5) * VMAX, rand_poss(5) * VMAX}; */
+        /* gas[n].vel = (Vector2){rand_float(-1,1) * VMAX, rand_float(-1,1) * VMAX}; */
+        gas[n].vel = (Vector2){rand_vel() * VMAX, rand_vel() * VMAX};
     }
 }
 
@@ -67,6 +74,10 @@ void borders(Particle *particle, int X, int Y) {
     if (particle->pos.y < RADIUS || particle->pos.y > Y - RADIUS)
         particle->vel.y *= -1;
 }
+
+/* void get_data(float vel) { */
+    
+/* } */
 
 int main() {
     srand(time(NULL));
@@ -81,6 +92,8 @@ int main() {
     Particle gas[N];
     init_gas(gas, X, Y);
 
+    float possible_vels[2*VEL_RANGE];
+
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
         float vqm = 0;
@@ -94,12 +107,14 @@ int main() {
 
             vqm += VectorSquare(gas[i].vel);
 
+            printf("%f\n", sqrt(VectorSquare(gas[i].vel)));
+
             DrawCircleV(gas[i].pos, RADIUS, GRAY);
         }
 
         vqm = sqrt(vqm / (float)N);
 
-        printf("%f\n", vqm);
+        /* printf("%.1f\n", vqm); */
 
         EndDrawing();
     }
