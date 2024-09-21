@@ -5,7 +5,7 @@
 #include <raylib.h>
 
 
-#define N 5000
+#define N 3000
 #define RADIUS 5
 
 // distance from borders when particles are initialized
@@ -75,10 +75,6 @@ void borders(Particle *particle, int X, int Y) {
         particle->vel.y *= -1;
 }
 
-/* void get_data(float vel) { */
-    
-/* } */
-
 int main() {
     srand(time(NULL));
 
@@ -107,14 +103,14 @@ int main() {
 
             vqm += VectorSquare(gas[i].vel);
 
-            printf("%f\n", sqrt(VectorSquare(gas[i].vel)));
+            /* printf("%f\n", sqrt(VectorSquare(gas[i].vel))); */
 
             DrawCircleV(gas[i].pos, RADIUS, GRAY);
         }
 
         vqm = sqrt(vqm / (float)N);
 
-        /* printf("%.1f\n", vqm); */
+        printf("%.1f\n", vqm);
 
         EndDrawing();
     }
