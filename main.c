@@ -53,17 +53,17 @@ float rand_vel(void) {
     for (;;) {
         x = (rand() % (2 * VEL_RANGE)) - VEL_RANGE;
         if (x != 0)
-            return x;
+            return (x * VMAX);
     }
 }
 
-void init_gas(Particle gas[N], int X, int Y) {
+void init_gas(Particle gas[N], int X, int Y, float magn_vels[N]) {
     for (int n=0; n<N; n++) {
         gas[n].pos.x = rand_float(0,1) * (X - SHIFT * 2) + SHIFT;
         gas[n].pos.y = rand_float(0,1) * (Y - SHIFT * 2) + SHIFT;
 
-        /* gas[n].vel = (Vector2){rand_float(-1,1) * VMAX, rand_float(-1,1) * VMAX}; */
-        gas[n].vel = (Vector2){rand_vel() * VMAX, rand_vel() * VMAX};
+        gas[n].vel = (Vector2){rand_vel(), rand_vel()};
+        magn_vels[n] = VectorMagn(gas[n].vel);
     }
 }
 
