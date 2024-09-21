@@ -5,15 +5,15 @@ pygame.init()
 clock = pygame.time.Clock()
 
 X, Y = 1000, 800
-FPS = 60
+FPS = 30
 
 screen = pygame.display.set_mode([X,Y])
 
 N = 1000
 R = 5
 
-n_vels = 3
-vmax = 20
+n_vels = 5
+vmax = 30
 
 gas = Gas(N, R, n_vels, vmax, FPS)
 

@@ -15,7 +15,7 @@ class Gas:
         self.positions  = []
         self.vels = []
 
-        self.possible_vels = [v for v in range(-self.n_vels, self.n_vels) if v != 0]
+        self.possible_vels = [v * self.vmax for v in range(-self.n_vels, self.n_vels+1) if v != 0]
 
         self.dt = 1/FPS
 
@@ -28,12 +28,22 @@ class Gas:
             self.positions.append(pos)
 
     def init_vels(self):
+        self.prob_of_vel = [0 for i in range(self.n_vels)]
+
         for i in range(self.N):
-            x = choice(self.possible_vels) * self.vmax
-            y = choice(self.possible_vels) * self.vmax
+            x = choice(self.possible_vels)
+            y = choice(self.possible_vels)
 
             vel = pygame.math.Vector2(x,y)
             self.vels.append(vel)
+
+            for v in range(self.n_vels):
+                if round(vel.magnitude(),2) == round(np.sqrt(2) * self.possible_vels[self.n_vels+v],2):
+                    self.prob_of_vel[v] += 1
+
+        for v in range(self.n_vels):
+            self.prob_of_vel[v] /= self.N
+            self.prob_of_vel[v] = round(100 * self.prob_of_vel[v], 2)
 
     def init(self, X, Y):
         self.init_pos(X,Y)
@@ -59,6 +69,13 @@ class Gas:
             self.draw(screen, i)
 
             vqm += self.vels[i].magnitude_squared()
-        
-        vqm /= self.N
-        print(vqm)
+
+        vqm = np.sqrt(vqm / self.N)
+
+        print("----------------------------")
+
+        for v in range(self.n_vels):
+            print("Magn. Vel: ", round(np.sqrt(2)*self.possible_vels[self.n_vels+v],2), 
+                  "- Prob: ", self.prob_of_vel[v], "%")
+
+        print("Vqm: ", round(vqm,2))
