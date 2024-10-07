@@ -8,14 +8,15 @@
 #define N 3000
 #define RADIUS 5
 
+// maximum velocity of a particle
+#define VMAX 80
+
+// range of possible integer x and y components of velocity
+// from 1 to number
+#define VEL_RANGE 5
+
 // distance from borders when particles are initialized
 #define SHIFT 15
-
-// maximum velocity of a particle
-#define VMAX 50
-
-// range of possible integer velocities (from -number to number)
-#define VEL_RANGE 5
 
 #define square(x) ((x) * (x))
 
@@ -49,21 +50,20 @@ float rand_float(float low, float high) {
 }
 
 float rand_vel(void) {
-    float x;
+    float dirs[] = {-1, 1};
     for (;;) {
-        x = (rand() % (2 * VEL_RANGE)) - VEL_RANGE;
+        float x = rand() % VEL_RANGE;
         if (x != 0)
-            return (x * VMAX);
+            return (x * VMAX * dirs[rand() % 2]);
     }
 }
 
-void init_gas(Particle gas[N], int X, int Y, float magn_vels[N]) {
+void init_gas(Particle gas[N], int X, int Y) {
     for (int n=0; n<N; n++) {
         gas[n].pos.x = rand_float(0,1) * (X - SHIFT * 2) + SHIFT;
         gas[n].pos.y = rand_float(0,1) * (Y - SHIFT * 2) + SHIFT;
 
         gas[n].vel = (Vector2){rand_vel(), rand_vel()};
-        magn_vels[n] = VectorMagn(gas[n].vel);
     }
 }
 
@@ -88,8 +88,6 @@ int main() {
     Particle gas[N];
     init_gas(gas, X, Y);
 
-    float possible_vels[2*VEL_RANGE];
-
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
         float vqm = 0;
@@ -103,14 +101,12 @@ int main() {
 
             vqm += VectorSquare(gas[i].vel);
 
-            /* printf("%f\n", sqrt(VectorSquare(gas[i].vel))); */
-
             DrawCircleV(gas[i].pos, RADIUS, GRAY);
         }
-
+        
         vqm = sqrt(vqm / (float)N);
 
-        printf("%.1f\n", vqm);
+        printf("Vqm: %.1f\n", vqm);
 
         EndDrawing();
     }
