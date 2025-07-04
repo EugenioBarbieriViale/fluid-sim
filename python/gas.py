@@ -37,14 +37,6 @@ class Gas:
             vel = pygame.math.Vector2(x,y)
             self.vels.append(vel)
 
-            for v in range(self.n_vels):
-                if round(vel.magnitude(),2) == round(np.sqrt(2) * self.possible_vels[self.n_vels+v],2):
-                    self.prob_of_vel[v] += 1
-
-        for v in range(self.n_vels):
-            self.prob_of_vel[v] /= self.N
-            self.prob_of_vel[v] = round(100 * self.prob_of_vel[v], 2)
-
     def init(self, X, Y):
         self.init_pos(X,Y)
         self.init_vels()
@@ -71,11 +63,4 @@ class Gas:
             vqm += self.vels[i].magnitude_squared()
 
         vqm = np.sqrt(vqm / self.N)
-
-        print("----------------------------")
-
-        for v in range(self.n_vels):
-            print("Magn. Vel: ", round(np.sqrt(2)*self.possible_vels[self.n_vels+v],2), 
-                  "- Prob: ", self.prob_of_vel[v], "%")
-
-        print("Vqm: ", round(vqm,2))
+        print("Vqm:", round(vqm,2))

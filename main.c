@@ -1,5 +1,5 @@
 // TODO:
-//  - continous collision detection
+// - sweep and prune
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,10 +8,12 @@
 #include <raylib.h>
 
 
-#define N 100
+#define N 50
 #define RADIUS 10
 
 #define VMAX 1.0e2
+
+#define SHIFT (RADIUS+40)
 
 typedef struct {
     Vector2 pos;
@@ -40,18 +42,18 @@ float VectorMagn(Vector2 v) {
 
 void init_gas(Particle gas[N], int X, int Y) {
     for (int n=0; n<N; n++) {
-        gas[n].pos.x = rand_float(0,1) * (X - RADIUS - 5) + RADIUS + 5;
-        gas[n].pos.y = rand_float(0,1) * (Y - RADIUS - 5) + RADIUS + 5;
+        gas[n].pos.x = rand_float(0,1) * (X - SHIFT * 2) + SHIFT;
+        gas[n].pos.y = rand_float(0,1) * (Y - SHIFT * 2) + SHIFT;
 
         gas[n].vel = (Vector2){rand_float(-1,1) * VMAX, rand_float(-1,1) * VMAX};
     }
 }
 
 void borders(Particle *particle, int X, int Y) {
-    if (particle->pos.x < RADIUS || particle->pos.x > X - RADIUS)
+    if (particle->pos.x < RADIUS || particle->pos.x > X - RADIUS - 3)
         particle->vel.x *= -1;
 
-    if (particle->pos.y < RADIUS || particle->pos.y > Y - RADIUS)
+    if (particle->pos.y < RADIUS || particle->pos.y > Y - RADIUS - 3)
         particle->vel.y *= -1;
 }
 
@@ -61,9 +63,11 @@ void collision(int index, Particle *particle, Particle gas[N]) {
         if (i != index) {
             float dist = VectorMagn(VectorDiff(particle->pos, gas[i].pos));
 
-            if (dist < 2*RADIUS) {
-                /* particle->vel = gas[i].vel; */
-                particle->vel.y *= -1;
+            // collision between bodies with equal mass results in a swap of velocities
+            if (dist < 2*RADIUS + 1*RADIUS/10) {
+                Vector2 temp = particle->vel;
+                particle->vel = gas[i].vel;
+                gas[i].vel = temp;
             }
         }
     }

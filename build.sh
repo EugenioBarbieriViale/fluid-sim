@@ -2,7 +2,7 @@
 
 set -xe
 
-g++ main.cpp -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+gcc perfect_gas.c -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 
 ./a.out
 
