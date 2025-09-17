@@ -4,6 +4,7 @@ use winit::event_loop::{ControlFlow, EventLoop};
 use crate::app::App;
 
 mod app;
+mod wgpu_ctx;
 
 
 fn main() -> Result<(), EventLoopError> {
