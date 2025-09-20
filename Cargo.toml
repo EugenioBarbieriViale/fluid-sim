@@ -1,5 +1,5 @@
 [package]
-name = "wind-tunnel"
+name = "triangle"
 version = "0.1.0"
 edition = "2024"
 
@@ -7,3 +7,5 @@ edition = "2024"
 winit = "0.30.12"
 pollster = "0.4.0"
 wgpu = "26.0.1"
+env_logger = "0.11.8"
+log = "0.4.28"
