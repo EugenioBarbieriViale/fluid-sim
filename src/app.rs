@@ -25,12 +25,13 @@ impl<'window> ApplicationHandler for App<'window> {
         }
     }
 
-    fn window_event(&mut self, event_loop: &ActiveEventLoop, id: WindowId, event: WindowEvent) {
+    fn window_event(&mut self, event_loop: &ActiveEventLoop, _id: WindowId, event: WindowEvent) {
         match event {
             WindowEvent::CloseRequested => event_loop.exit(),
             WindowEvent::RedrawRequested => {
                 if let Some(wgpu_ctx) = self.wgpu_ctx.as_mut() {
                     wgpu_ctx.draw();
+                    // self.window.as_mut().unwrap().request_redraw();
                 }
             },
             _ => {},

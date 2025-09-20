@@ -8,6 +8,9 @@ mod wgpu_ctx;
 
 
 fn main() -> Result<(), EventLoopError> {
+    env_logger::init();
+
+
     let event_loop = EventLoop::new().unwrap();
 
     event_loop.set_control_flow(ControlFlow::Poll);
