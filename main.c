@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
@@ -8,16 +7,16 @@ const int X = 1000;
 const int Y =  800;
 const int FPS = 60;
 
-const int N =   50;
-const float R = 10;
+const int N =  1000;
+const float R = 5;
 
-const float H =  50; // interaction radius
-const float D_0 = 1; // rest density
+const float H =  20; // interaction radius
+const float D_0 = 10; // rest density
 
-const float K = 1; // stiffness constant
-const float K_NEAR = 1; // stiffness constant
+const float K = 50; // stiffness constant
+const float K_NEAR = 60; // near stiffness constant
 
-const float DAMPING = 0.8;
+const float DAMPING = 0.5;
 const Vector2 g = {0, 9.81};
 
 
@@ -63,6 +62,8 @@ void dd_relaxation(Particle *p, Particle f[], float dt) {
 	float near_density = 0.0;
 
 	for (int j=0; j<N; j++) {
+        if (p == &f[j]) continue;
+
 		float dist = length(diff(p->pos, f[j].pos));
 
 		if (dist < H) {
@@ -72,12 +73,13 @@ void dd_relaxation(Particle *p, Particle f[], float dt) {
 	}
 
 	float pressure = K * (density - D_0);
-    printf("%f\n", pressure);
     float near_pressure = K_NEAR * near_density;
                                           
     Vector2 d_pos = {0.f, 0.f};
 
 	for (int j=0; j<N; j++) {
+        if (p == &f[j]) continue;
+
 		Vector2 dist = diff(p->pos, f[j].pos);
 
         if (length(dist) < H) {
@@ -96,22 +98,34 @@ void dd_relaxation(Particle *p, Particle f[], float dt) {
 }
 
 void borders(Particle *p, float dt) {
-	if (p->pos.x + p->vel.x * dt <= R ||
-        p->pos.x + p->vel.x * dt >= X - R) {
+	if (p->pos.x + p->vel.x * dt < R) {
+        p->pos.x = R;
+		p->vel.x *= -DAMPING;
+	} else if (p->pos.x + p->vel.x * dt >= X - R) {
+        p->pos.x = X - R;
+        p->vel.x *= -DAMPING;
+    }
 
-		p->vel.x *= -1 * DAMPING;
-	}
-
-	if (p->pos.y + p->vel.y * dt <= R ||
-        p->pos.y + p->vel.y * dt >= Y - R) {
-
-		p->vel.y *= -1 * DAMPING;
-	}
+	if (p->pos.y + p->vel.y * dt < R) {
+        p->pos.y = R;
+		p->vel.y *= -DAMPING;
+	} else if (p->pos.y + p->vel.y * dt >= Y - R) {
+        p->pos.y = Y - R;
+        p->vel.y *= -DAMPING;
+    }
 }
 
-void draw(Particle p) {
-    DrawCircleV(p.pos, R, GRAY);
+Vector2 calc_next_vel(Vector2 pos, Vector2 prev_pos, float dt) {
+    Vector2 pos_diff = diff(pos, prev_pos);
+    Vector2 next_vel = scalar_mult(pos_diff, 1.0f / dt);
+    
+    if (isnan(next_vel.x) || isnan(next_vel.y)) {
+        return (Vector2){0, 0};
+    }
+    
+    return next_vel;
 }
+
 
 int main() {
     srand(time(NULL));
@@ -135,26 +149,18 @@ int main() {
 
 		for (int i=0; i<N; i++) {
             Particle *p = &f[i];
-
             p->vel = sum(scalar_mult(g, dt), p->vel); // gravity
-            
-            // viscosity
 
             Vector2 prev_pos = p->pos;
             p->pos = sum(scalar_mult(p->vel, dt), p->pos);
 
-            // adjust springs
-            // modify position according to springs
-            // double density relaxation
             dd_relaxation(p, f, dt);
-            // collision resolution
+            
+			borders(p, dt);
 
-			borders(&f[i], dt);
+            p->vel = calc_next_vel(p->pos, prev_pos, dt);
 
-            p->vel = scalar_mult(diff(p->pos, prev_pos), 1/dt);
-
-            // printf("%f", f[i].pos.x);
-			draw(f[i]);
+            DrawCircleV(f[i].pos, R, GRAY);
 		}
 
         EndDrawing();
