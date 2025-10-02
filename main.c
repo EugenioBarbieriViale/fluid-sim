@@ -55,6 +55,13 @@ void alloc_springs(Springs *sprs, int capacity) {
     sprs->capacity = capacity;
 }
 
+void realloc_springs(Springs *sprs, int capacity) {
+    sprs->is = (int*)realloc(sprs->is, capacity * sizeof(int));
+    sprs->js = (int*)realloc(sprs->js, capacity * sizeof(int));
+    sprs->rest_lengths = (float*)realloc(sprs->rest_lengths, capacity * sizeof(float));
+    sprs->capacity = capacity;
+}
+
 int find_spring(const Springs *sprs, int i, int j) {
     for (int idx = 0; idx < sprs->count; idx++) {
         if ((sprs->is[idx] == i && sprs->js[idx] == j) ||
@@ -66,12 +73,26 @@ int find_spring(const Springs *sprs, int i, int j) {
 }
 
 void add_spring(Springs *sprs, int i, int j, float rl) {
-    if (sprs->count < sprs->capacity && find_spring(sprs, i, j) == -1) {
-        sprs->is[sprs->count] = i;
-        sprs->js[sprs->count] = j;
+    if (find_spring(sprs, i, j) != -1) return;
 
-        sprs->rest_lengths[sprs->count] = rl;
-        sprs->count++;
+    if (sprs->count >= sprs->capacity) {
+        realloc_springs(sprs, sprs->capacity * 2);
+    }
+
+    sprs->is[sprs->count] = i;
+    sprs->js[sprs->count] = j;
+
+    sprs->rest_lengths[sprs->count] = rl;
+    sprs->count++;
+}
+
+void shrink_springs(Springs *sprs) {
+    int min_capacity = 64;
+
+    if (sprs->count < sprs->capacity / 4 && sprs->capacity > min_capacity) {
+        int new_capacity = sprs->capacity / 2;
+        if (new_capacity < min_capacity) new_capacity = min_capacity;
+        realloc_springs(sprs, new_capacity);
     }
 }
 
@@ -260,6 +281,8 @@ int main() {
     Springs sprs;
     alloc_springs(&sprs, N * 50); // memory inefficient, fix later
 
+    int frames = 0;
+
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
 
@@ -292,6 +315,10 @@ int main() {
         }
 
         EndDrawing();
+
+        if (++frames % FPS == 0) {
+            shrink_springs(&sprs);
+        }
     }
 
     CloseWindow();
