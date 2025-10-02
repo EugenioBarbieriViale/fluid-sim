@@ -5,26 +5,26 @@ const int X = 1000;
 const int Y =  800;
 const int FPS = 60;
 
-const int N =  500;
+const int N = 1000;
 
 #if 1
-const float R = 7.f;
+const float R = 2.f;
 const Color color = GRAY;
 #else
-const float R = 30.f;
+const float R = 4.f;
 const Color color = {40, 40, 200, 60};
 #endif
 
 const float G = 9.81f;
 const Vector2 g = {0, 1.5 * G};
 
-const float DAMPING = 0.95f;
+const float DAMPING = 0.7f;
 
 // interaction radius
 const float H = 20.f;
 
 // rest density
-const float D_0 = 10.f;
+const float D_0 = 40.f;
 
 // stiffness constant
 const float K = 50.f;
