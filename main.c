@@ -87,11 +87,9 @@ void add_spring(Springs *sprs, int i, int j, float rl) {
 }
 
 void shrink_springs(Springs *sprs) {
-    int min_capacity = 64;
-
-    if (sprs->count < sprs->capacity / 4 && sprs->capacity > min_capacity) {
+    if (sprs->count < sprs->capacity / 4 && sprs->capacity > MIN_CAPACITY) {
         int new_capacity = sprs->capacity / 2;
-        if (new_capacity < min_capacity) new_capacity = min_capacity;
+        if (new_capacity < MIN_CAPACITY) new_capacity = MIN_CAPACITY;
         realloc_springs(sprs, new_capacity);
     }
 }
@@ -279,7 +277,7 @@ int main() {
     init_system(&sys);
 
     Springs sprs;
-    alloc_springs(&sprs, N * 50); // memory inefficient, fix later
+    alloc_springs(&sprs, 128); // memory inefficient, fix later
 
     int frames = 0;
 
