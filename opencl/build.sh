@@ -6,6 +6,6 @@ gcc -o main main.c -lOpenCL -Wall
 
 ./main
 
-# rm main
+rm main
 
 exit

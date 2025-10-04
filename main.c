@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
@@ -31,20 +32,20 @@ void alloc_system(ParticleSystem *sys) {
     sys->velocities = (Vector2*)malloc(N * sizeof(Vector2));
 }
 
+void free_system(ParticleSystem *sys) {
+    free(sys->positions);
+    free(sys->prev_positions);
+    free(sys->velocities);
+}
+
 void init_system(ParticleSystem *sys) {
     if (sys->positions && sys->prev_positions && sys->velocities) {
-        for (int i=0; i<N; i++) {
+        for (int i = 0; i < N; i++) {
             sys->positions[i] = (Vector2){rand_float(R, X / 2.f - R), rand_float(R, Y - R)};
             sys->prev_positions[i] = sys->positions[i];
             sys->velocities[i] = (Vector2){0, 0};
         }
     }
-}
-
-void free_system(ParticleSystem *sys) {
-    free(sys->positions);
-    free(sys->prev_positions);
-    free(sys->velocities);
 }
 
 void alloc_springs(Springs *sprs, int capacity) {
@@ -53,6 +54,12 @@ void alloc_springs(Springs *sprs, int capacity) {
     sprs->rest_lengths = (float*)malloc(capacity * sizeof(float));
     sprs->count = 0;
     sprs->capacity = capacity;
+}
+
+void free_springs(Springs *sprs) {
+    free(sprs->is);
+    free(sprs->js);
+    free(sprs->rest_lengths);
 }
 
 void realloc_springs(Springs *sprs, int capacity) {
@@ -73,17 +80,26 @@ int find_spring(const Springs *sprs, int i, int j) {
 }
 
 void add_spring(Springs *sprs, int i, int j, float rl) {
-    if (find_spring(sprs, i, j) != -1) return;
-
-    if (sprs->count >= sprs->capacity) {
-        realloc_springs(sprs, sprs->capacity * 2);
-    }
-
     sprs->is[sprs->count] = i;
     sprs->js[sprs->count] = j;
 
     sprs->rest_lengths[sprs->count] = rl;
     sprs->count++;
+
+    if (sprs->count >= sprs->capacity) {
+        realloc_springs(sprs, sprs->capacity * 2);
+    }
+
+}
+
+void remove_spring(Springs *sprs, int idx) {
+    if (sprs->count != 0 && sprs->count < sprs->capacity) {
+        sprs->is[idx] = sprs->is[sprs->count - 1];
+        sprs->js[idx] = sprs->js[sprs->count - 1];
+
+        sprs->rest_lengths[idx] = sprs->rest_lengths[sprs->count - 1];
+        sprs->count--;
+    }
 }
 
 void shrink_springs(Springs *sprs) {
@@ -94,30 +110,12 @@ void shrink_springs(Springs *sprs) {
     }
 }
 
-void remove_spring(Springs *sprs, int idx, int i, int j) {
-    if (sprs->count < sprs->capacity && find_spring(sprs, i, j) != -1) {
-        // fix last springs, that remain hanging
-
-        sprs->is[idx] = sprs->is[sprs->count - 1];
-        sprs->js[idx] = sprs->js[sprs->count - 1];
-
-        sprs->rest_lengths[idx] = sprs->rest_lengths[sprs->count - 1];
-        sprs->count--;
-    }
-}
-
-void free_springs(Springs *sprs) {
-    free(sprs->is);
-    free(sprs->js);
-    free(sprs->rest_lengths);
-}
-
 void dd_relaxation(ParticleSystem *sys, float dt) {
-    for (int i=0; i<N; i++) {
+    for (int i = 0; i < N; i++) {
         float density = 0.0;
         float near_density = 0.0;
 
-        for (int j=0; j<N; j++) {
+        for (int j = 0; j < N; j++) {
             if (i == j) continue;
 
             float dist_len = length(diff(sys->positions[i], sys->positions[j]));
@@ -133,7 +131,7 @@ void dd_relaxation(ParticleSystem *sys, float dt) {
 
         Vector2 d_pos = {0.f, 0.f};
 
-        for (int j=0; j<N; j++) {
+        for (int j = 0; j < N; j++) {
             if (i == j) continue;
 
             Vector2 dist = diff(sys->positions[i], sys->positions[j]);
@@ -157,6 +155,9 @@ void dd_relaxation(ParticleSystem *sys, float dt) {
 
 void apply_spring(ParticleSystem *sys, Springs *sprs, float dt) {
     for (int idx = 0; idx < sprs->count; idx++) {
+        // printf("cap: %d, cou: %d\n", sprs->capacity, sprs->count);
+        printf("count: %d\n", sprs->count);
+        
         int i = sprs->is[idx];
         int j = sprs->js[idx];
 
@@ -164,7 +165,7 @@ void apply_spring(ParticleSystem *sys, Springs *sprs, float dt) {
         float dist_len = length(dist);
         Vector2 versor = scalar_mult(dist, 1.f / length(dist));
 
-        if (dist_len < H) {
+        if (dist_len < H && dist_len > 1e-4f) {
             float L = sprs->rest_lengths[idx];
 
             float factor = (1 - L / H) * (L - dist_len);
@@ -177,51 +178,56 @@ void apply_spring(ParticleSystem *sys, Springs *sprs, float dt) {
 }
 
 void adjust_spring(ParticleSystem *sys, Springs *sprs, float dt) {
-    for (int idx = 0; idx < sprs->count; idx++) {
-        int i = sprs->is[idx];
-        int j = sprs->js[idx];
+    for (int i = 0; i < N; i++) {
+        for (int j = i + 1; j < N; j++) {
+            Vector2 dist = diff(sys->positions[i], sys->positions[j]);
+            float dist_len = length(dist);
 
-        Vector2 dist = diff(sys->positions[i], sys->positions[j]);
-        float dist_len = length(dist);
-        Vector2 versor = scalar_mult(dist, 1.f / length(dist));
+            if (dist_len < H && dist_len > 1e-4f) {
+                int idx = find_spring(sprs, i, j);
 
-        if (dist_len < H) {
-            if (find_spring(sprs, i, j) == -1) {
-                add_spring(sprs, i, j, H);
-            }
+                if (idx == -1) {
+                    add_spring(sprs, i, j, dist_len);
+                } 
 
-            float L = sprs->rest_lengths[idx];
-            float deformation = L * GAMMA;
+                else {
+                    float L = sprs->rest_lengths[idx];
+                    float deformation = L * GAMMA;
 
-            if (dist_len > L + deformation) {
-                sprs->rest_lengths[idx] += dt * ALPHA * (dist_len - L - deformation);
-            }
+                    if (dist_len > L + deformation) {
+                        sprs->rest_lengths[idx] += dt * ALPHA * (dist_len - L - deformation);
+                    }
 
-            else if (dist_len < L - deformation) {
-                sprs->rest_lengths[idx] -= dt * ALPHA * (L - deformation - dist_len); 
+                    else if (dist_len < L - deformation) {
+                        sprs->rest_lengths[idx] -= dt * ALPHA * (L - deformation - dist_len); 
+                    }
+                }
             }
         }
     }
 
     for (int idx = sprs->count - 1; idx >= 0; idx--) {
-        if (sprs->rest_lengths[idx] > H) {
-            remove_spring(sprs, idx, sprs->is[idx], sprs->js[idx]);
+        int i = sprs->is[idx];
+        int j = sprs->js[idx];
+        
+        float dist_len = length(diff(sys->positions[i], sys->positions[j]));
+        
+        if (sprs->rest_lengths[idx] >= SPRING_THRESHOLD * H 
+                && dist_len >= SPRING_THRESHOLD * H) {
+            remove_spring(sprs, idx);
         }
     }
 }
 
 void viscosity(ParticleSystem *sys, float dt) {
-    for (int i=0; i<N; i++) {
-        for (int j=0; j<N; j++) {
-            if (i == j) continue;
-            if (i > j) break;
-
+    for (int i = 0; i < N; i++) {
+        for (int j = i + 1; j < N; j++) {
             Vector2 dist = diff(sys->positions[i], sys->positions[j]);
             Vector2 versor = scalar_mult(dist, 1.f / length(dist));
 
             if (length(dist) < H) {
-                float factor = length(sys->velocities[i]) - length(sys->velocities[j]);
-                float lu = length(scalar_mult(versor, factor));
+                float lu = length(sys->velocities[i]) - length(sys->velocities[j]);
+                // float lu = length(scalar_mult(versor, factor));
 
                 if (lu > 0) {
                     float li = dt * (1 - length(dist) / H) * (SIGMA * lu + BETA * lu * lu);
@@ -277,7 +283,7 @@ int main() {
     init_system(&sys);
 
     Springs sprs;
-    alloc_springs(&sprs, 128); // memory inefficient, fix later
+    alloc_springs(&sprs, 128);
 
     int frames = 0;
 
@@ -287,14 +293,14 @@ int main() {
         BeginDrawing();
         ClearBackground(BLACK);
 
-        for (int i=0; i<N; i++) {
+        for (int i = 0; i < N; i++) {
             // gravity
             sys.velocities[i] = sum(scalar_mult(g, dt), sys.velocities[i]);
         }
 
         viscosity(&sys, dt);
 
-        for (int i=0; i<N; i++) {
+        for (int i = 0; i < N; i++) {
             sys.prev_positions[i] = sys.positions[i];
             sys.positions[i] = sum(scalar_mult(sys.velocities[i], dt), sys.positions[i]);
         }
@@ -304,11 +310,11 @@ int main() {
 
         dd_relaxation(&sys, dt);
 
-        for (int i=0; i<N; i++) {
+        for (int i = 0; i < N; i++) {
             sys.velocities[i] = calc_next_vel(sys.positions[i], sys.prev_positions[i], dt);
             borders(&sys.positions[i], &sys.velocities[i]);
 
-            DrawText(TextFormat("%0.3f", 1.f / dt), 10, 10, 40, WHITE);
+            DrawText(TextFormat("%0.1f", 1.f / dt), 10, 10, 40, WHITE);
             DrawCircleV(sys.positions[i], R, color);
         }
 

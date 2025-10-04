@@ -8,7 +8,6 @@
 #endif
 
 #define N 128
-#define FILE_SIZE_B 142
 
 typedef struct {
     char *source;
@@ -23,9 +22,13 @@ Source read_kernel(const char *filename, int unsigned show) {
         exit(1);
     }
 
+    fseek(fptr, 0L, SEEK_END);
+    size_t file_size = ftell(fptr);
+    fseek(fptr, 0L, SEEK_SET);
+
     Source s;
-    s.source = (char*)malloc(FILE_SIZE_B);
-    s.size = fread(s.source, 1, FILE_SIZE_B, fptr);
+    s.source = (char*)malloc(file_size);
+    s.size = fread(s.source, 1, file_size, fptr);
 
     if (show) {
         printf("\n--------- Kernel ---------\n");
@@ -116,7 +119,7 @@ int main() {
     cl_int info = clGetPlatformIDs(1, &platform, NULL);
     check_error(info, "clGetPlatformIDs");
 
-    info = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, &num_devices);
+    info = clGetDeviceIDs(platform, CL_DEVICE_TYPE_DEFAULT, 1, &device, &num_devices);
     check_error(info, "clGetDeviceIDs");
     show_device_info(device, num_devices);
 

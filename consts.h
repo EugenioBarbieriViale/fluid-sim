@@ -17,7 +17,8 @@ const Color color = {40, 40, 200, 60};
 #endif
 
 const float G = 9.81f;
-const Vector2 g = {0, 1.5 * G};
+// const float G = 0.f;
+const Vector2 g = {0, G};
 
 const float DAMPING = 0.7f;
 
@@ -25,7 +26,7 @@ const float DAMPING = 0.7f;
 const float H = 20.f;
 
 // rest density
-const float D_0 = 20.f;
+const float D_0 = 40.f;
 
 // stiffness constant
 const float K = 30.f;
@@ -34,10 +35,11 @@ const float K = 30.f;
 const float K_NEAR = 2.f * K;
 
 // spring constant for elasticity
-const float K_SPRING = 10.f;
+// const float K_SPRING = 10.f;
+const float K_SPRING = 30.f;
 
-// rest length of springs
-const float L_0 = H / 2.f;
+// resize H as threshold to remove a spring
+const float SPRING_THRESHOLD = 0.7f;
 
 // yield ratio
 const float GAMMA = 0.1f;
