@@ -89,7 +89,6 @@ void add_spring(Springs *sprs, int i, int j, float rl) {
     if (sprs->count >= sprs->capacity) {
         realloc_springs(sprs, sprs->capacity * 2);
     }
-
 }
 
 void remove_spring(Springs *sprs, int idx) {
@@ -212,8 +211,7 @@ void adjust_spring(ParticleSystem *sys, Springs *sprs, float dt) {
         
         float dist_len = length(diff(sys->positions[i], sys->positions[j]));
         
-        if (sprs->rest_lengths[idx] >= SPRING_THRESHOLD * H 
-                && dist_len >= SPRING_THRESHOLD * H) {
+        if (sprs->rest_lengths[idx] >= SPRING_THRESHOLD * H) {
             remove_spring(sprs, idx);
         }
     }
@@ -227,7 +225,6 @@ void viscosity(ParticleSystem *sys, float dt) {
 
             if (length(dist) < H) {
                 float lu = length(sys->velocities[i]) - length(sys->velocities[j]);
-                // float lu = length(scalar_mult(versor, factor));
 
                 if (lu > 0) {
                     float li = dt * (1 - length(dist) / H) * (SIGMA * lu + BETA * lu * lu);
