@@ -4,8 +4,8 @@
 #include <time.h>
 #include <raylib.h>
 
-#include "vect.h"
-#include "consts.h"
+#include "include/vect.h"
+#include "include/consts.h"
 
 
 float rand_float(float low, float high) {
