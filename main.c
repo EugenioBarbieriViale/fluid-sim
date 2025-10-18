@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
@@ -154,17 +153,14 @@ void dd_relaxation(ParticleSystem *sys, float dt) {
 
 void apply_spring(ParticleSystem *sys, Springs *sprs, float dt) {
     for (int idx = 0; idx < sprs->count; idx++) {
-        // printf("cap: %d, cou: %d\n", sprs->capacity, sprs->count);
-        printf("count: %d\n", sprs->count);
-        
         int i = sprs->is[idx];
         int j = sprs->js[idx];
 
         Vector2 dist = diff(sys->positions[i], sys->positions[j]);
         float dist_len = length(dist);
-        Vector2 versor = scalar_mult(dist, 1.f / length(dist));
 
         if (dist_len < H && dist_len > 1e-4f) {
+            Vector2 versor = scalar_mult(dist, 1.f / length(dist));
             float L = sprs->rest_lengths[idx];
 
             float factor = (1 - L / H) * (L - dist_len);
@@ -221,9 +217,10 @@ void viscosity(ParticleSystem *sys, float dt) {
     for (int i = 0; i < N; i++) {
         for (int j = i + 1; j < N; j++) {
             Vector2 dist = diff(sys->positions[i], sys->positions[j]);
-            Vector2 versor = scalar_mult(dist, 1.f / length(dist));
+            float dist_len = length(dist);
 
-            if (length(dist) < H) {
+            if (dist_len < H && dist_len > 1e-4f) {
+                Vector2 versor = scalar_mult(dist, 1.f / length(dist));
                 float lu = length(sys->velocities[i]) - length(sys->velocities[j]);
 
                 if (lu > 0) {
