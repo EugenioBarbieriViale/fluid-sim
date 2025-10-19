@@ -4,7 +4,6 @@
 #include "physics.h"
 #include "parallel.h"
 
-
 float rand_float(float low, float high) {
     return ((float)rand() / (float)(RAND_MAX)) * fabs(low - high) + low;
 }

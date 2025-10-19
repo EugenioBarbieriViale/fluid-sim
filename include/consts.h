@@ -6,6 +6,7 @@
 #ifdef __APPLE__
 #include <OpenCL/opencl.h>
 #else
+#define CL_TARGET_OPENCL_VERSION 300
 #include <CL/cl.h>
 #endif
 
@@ -13,6 +14,9 @@
 extern const int X;
 extern const int Y;
 extern const int FPS;
+
+// name of kernel file
+extern const char *KERNEL_FILENAME;
 
 // particle system
 extern const int N;

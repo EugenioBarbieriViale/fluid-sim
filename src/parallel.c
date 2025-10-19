@@ -1,7 +1,7 @@
 #include "parallel.h"
 
-static Source read_kernel(const char *filename, int unsigned show) {
-    FILE *fptr = fopen(filename, "r");
+static Source read_kernel(int unsigned show) {
+    FILE *fptr = fopen(KERNEL_FILENAME, "r");
 
     if (!fptr) {
         fprintf(stderr, "Could not load the kernel\n");
@@ -91,7 +91,7 @@ static void program_log(cl_program program, cl_device_id device) {
 OpenCLState init_opencl(int show_kernel) {
     OpenCLState cl_state;
 
-    Source s = read_kernel("kernel.cl", show_kernel);
+    Source s = read_kernel(show_kernel);
 
     cl_platform_id platform = NULL;
     cl_state.device = NULL;
@@ -105,16 +105,24 @@ OpenCLState init_opencl(int show_kernel) {
     show_device_info(cl_state.device, num_devices);
 
     cl_state.context = clCreateContext(NULL, 1, &cl_state.device, NULL, NULL, &info);
+    check_error(info, "clCreateContext");
     cl_state.queue = clCreateCommandQueueWithProperties(cl_state.context, cl_state.device, 0, &info);
+    check_error(info, "clCreateCommandQueueWithProperties");
 
     // create memory buffers
     cl_state.pos_mem_obj = clCreateBuffer(cl_state.context, CL_MEM_READ_WRITE, N * sizeof(Vector2), NULL, &info);
+    check_error(info, "clCreateBuffer");
     cl_state.prev_pos_mem_obj = clCreateBuffer(cl_state.context, CL_MEM_READ_WRITE, N * sizeof(Vector2), NULL, &info);
+    check_error(info, "clCreateBuffer");
     cl_state.vel_mem_obj = clCreateBuffer(cl_state.context, CL_MEM_READ_WRITE, N * sizeof(Vector2), NULL, &info);
+    check_error(info, "clCreateBuffer");
 
     cl_state.is_mem_obj = clCreateBuffer(cl_state.context, CL_MEM_READ_WRITE, N * sizeof(int), NULL, &info);
+    check_error(info, "clCreateBuffer");
     cl_state.js_mem_obj = clCreateBuffer(cl_state.context, CL_MEM_READ_WRITE, N * sizeof(int), NULL, &info);
+    check_error(info, "clCreateBuffer");
     cl_state.rl_mem_obj = clCreateBuffer(cl_state.context, CL_MEM_READ_WRITE, N * sizeof(float), NULL, &info);
+    check_error(info, "clCreateBuffer");
 
     cl_state.program = clCreateProgramWithSource(
             cl_state.context,
@@ -122,12 +130,14 @@ OpenCLState init_opencl(int show_kernel) {
             (const char**)&s.source,
             (const size_t*)&s.size,
             &info);
+    check_error(info, "clCreateProgramWithSource");
 
     info = clBuildProgram(cl_state.program, 1, &cl_state.device, NULL, NULL, NULL);
     program_log(cl_state.program, cl_state.device);
     check_error(info, "clBuildProgram");
 
     cl_state.kernel = clCreateKernel(cl_state.program, "compute", &info);
+    check_error(info, "clCreateKernel");
 
     info = clSetKernelArg(cl_state.kernel, 0, sizeof(cl_mem), (void*)&cl_state.pos_mem_obj);
     check_error(info, "clSetKernelArg0");
@@ -151,17 +161,27 @@ void release_opencl(OpenCLState *cl_state) {
     cl_int info;
 
     info = clReleaseKernel(cl_state->kernel);
+    check_error(info, "clReleaseKernel");
     info = clReleaseProgram(cl_state->program);
+    check_error(info, "clReleaseProgram");
 
     info = clReleaseMemObject(cl_state->pos_mem_obj);
+    check_error(info, "clReleaseMemObject");
     info = clReleaseMemObject(cl_state->prev_pos_mem_obj);
+    check_error(info, "clReleaseMemObject");
     info = clReleaseMemObject(cl_state->vel_mem_obj);
+    check_error(info, "clReleaseMemObject");
     info = clReleaseMemObject(cl_state->is_mem_obj);
+    check_error(info, "clReleaseMemObject");
     info = clReleaseMemObject(cl_state->js_mem_obj);
+    check_error(info, "clReleaseMemObject");
     info = clReleaseMemObject(cl_state->rl_mem_obj);
+    check_error(info, "clReleaseMemObject");
 
     info = clReleaseCommandQueue(cl_state->queue);
+    check_error(info, "clReleaseCommandQueue");
     info = clReleaseContext(cl_state->context);
+    check_error(info, "clReleaseContext");
 }
 
 void parallel_compute(OpenCLState *cl_state, ParticleSystem *sys, Springs *sprs) {

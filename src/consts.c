@@ -5,6 +5,9 @@ const int X = 1000;
 const int Y = 800;
 const int FPS = 60;
 
+// name of kernel file
+const char *KERNEL_FILENAME = "kernel.cl";
+
 // particle system
 const int N = 1000;
 const int MIN_CAPACITY = 64;
