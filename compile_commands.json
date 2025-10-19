@@ -1,0 +1,62 @@
+[
+  {
+    "arguments": [
+      "/sbin/gcc",
+      "-c",
+      "-I./include",
+      "-Wall",
+      "-Wextra",
+      "src/main.c"
+    ],
+    "directory": "/home/eu/programming/fluid-sim",
+    "file": "/home/eu/programming/fluid-sim/src/main.c"
+  },
+  {
+    "arguments": [
+      "/sbin/gcc",
+      "-c",
+      "-I./include",
+      "-Wall",
+      "-Wextra",
+      "src/consts.c"
+    ],
+    "directory": "/home/eu/programming/fluid-sim",
+    "file": "/home/eu/programming/fluid-sim/src/consts.c"
+  },
+  {
+    "arguments": [
+      "/sbin/gcc",
+      "-c",
+      "-I./include",
+      "-Wall",
+      "-Wextra",
+      "src/physics.c"
+    ],
+    "directory": "/home/eu/programming/fluid-sim",
+    "file": "/home/eu/programming/fluid-sim/src/physics.c"
+  },
+  {
+    "arguments": [
+      "/sbin/gcc",
+      "-c",
+      "-I./include",
+      "-Wall",
+      "-Wextra",
+      "src/springs.c"
+    ],
+    "directory": "/home/eu/programming/fluid-sim",
+    "file": "/home/eu/programming/fluid-sim/src/springs.c"
+  },
+  {
+    "arguments": [
+      "/sbin/gcc",
+      "-c",
+      "-I./include",
+      "-Wall",
+      "-Wextra",
+      "src/parallel.c"
+    ],
+    "directory": "/home/eu/programming/fluid-sim",
+    "file": "/home/eu/programming/fluid-sim/src/parallel.c"
+  }
+]

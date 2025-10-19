@@ -1,7 +1,8 @@
 #include <time.h>
 #include <raylib.h>
 
-#include "include/physics.h"
+#include "physics.h"
+#include "parallel.h"
 
 
 float rand_float(float low, float high) {
@@ -73,9 +74,10 @@ int main() {
 
     Springs sprs;
     alloc_springs(&sprs, 128);
+    
+    OpenCLState cl_state = init_opencl(1);
 
     int frames = 0;
-
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
 
@@ -115,6 +117,8 @@ int main() {
     }
 
     CloseWindow();
+
+    release_opencl(&cl_state);
 
     free_system(&sys);
     free_springs(&sprs);

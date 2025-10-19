@@ -4,18 +4,20 @@ set -xe
 
 OS=$(uname -s)
 
+CFILES="src/main.c src/consts.c src/physics.c src/springs.c src/parallel.c"
+CFLAGS="-I./include -lm -Wall -Wextra"
+
 if [ "$OS" = "Linux" ]; then
-    gcc main.c include/consts.c include/physics.c include/springs.c -lraylib -lOpenCL -lm -lGL -lpthread -ldl -lrt -lX11 -Wall -Wextra
+    gcc $CFILES $CFLAGS -lraylib -lOpenCL -lGL -lpthread -ldl -lrt -lX11
     
 elif [ "$OS" = "Darwin" ]; then
-    gcc main.c \
+    gcc $CFILES $CFLAGS \
         -lraylib \
         -framework OpenCL \
         -framework OpenGL \
         -framework Cocoa \
         -framework IOKit \
         -framework CoreVideo \
-        -lm
         
 else
     echo "Unsupported OS: $OS"
