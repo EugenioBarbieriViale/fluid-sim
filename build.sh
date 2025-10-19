@@ -5,7 +5,7 @@ set -xe
 OS=$(uname -s)
 
 if [ "$OS" = "Linux" ]; then
-    gcc main.c -lraylib -lOpenCL -lm -lGL -lpthread -ldl -lrt -lX11 -Wall -Wextra
+    gcc main.c include/consts.c include/physics.c include/springs.c -lraylib -lOpenCL -lm -lGL -lpthread -ldl -lrt -lX11 -Wall -Wextra
     
 elif [ "$OS" = "Darwin" ]; then
     gcc main.c \
