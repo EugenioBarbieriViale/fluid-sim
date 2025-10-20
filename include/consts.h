@@ -2,7 +2,8 @@
 #define CONSTANTS_H
 
 #include <raylib.h>
-#include <stdlib.h>
+#include "math.h"
+
 #ifdef __APPLE__
 #include <OpenCL/opencl.h>
 #else
@@ -15,8 +16,8 @@ extern const int X;
 extern const int Y;
 extern const int FPS;
 
-// name of kernel file
-extern const char *KERNEL_FILENAME;
+// path to kernel
+extern const char *KERNEL_PATH;
 
 // particle system
 extern const int N;
@@ -75,5 +76,7 @@ typedef struct {
     int count;
     int capacity;
 } Springs;
+
+float rand_float(float, float);
 
 #endif

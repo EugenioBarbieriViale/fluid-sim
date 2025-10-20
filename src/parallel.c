@@ -1,7 +1,7 @@
 #include "parallel.h"
 
 static Source read_kernel(int unsigned show) {
-    FILE *fptr = fopen(KERNEL_FILENAME, "r");
+    FILE *fptr = fopen(KERNEL_PATH, "r");
 
     if (!fptr) {
         fprintf(stderr, "Could not load the kernel\n");
@@ -136,7 +136,7 @@ OpenCLState init_opencl(int show_kernel) {
     program_log(cl_state.program, cl_state.device);
     check_error(info, "clBuildProgram");
 
-    cl_state.kernel = clCreateKernel(cl_state.program, "compute", &info);
+    cl_state.kernel = clCreateKernel(cl_state.program, "computeNextState", &info);
     check_error(info, "clCreateKernel");
 
     info = clSetKernelArg(cl_state.kernel, 0, sizeof(cl_mem), (void*)&cl_state.pos_mem_obj);

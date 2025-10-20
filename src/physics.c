@@ -1,6 +1,46 @@
 #include "physics.h"
 
-void dd_relaxation(ParticleSystem *sys, float dt) {
+static void dd_relaxation(ParticleSystem*, float);
+static void apply_spring(ParticleSystem*, Springs*, float);
+static void adjust_spring(ParticleSystem*, Springs*, float);
+static void viscosity(ParticleSystem*, float);
+
+static Vector2 calc_next_vel(Vector2, Vector2, float);
+static void borders(Vector2*, Vector2*);
+
+
+void update(ParticleSystem *sys, Springs *sprs, int *frames, float dt) {
+    for (int i = 0; i < N; i++) {
+        // gravity
+        sys->velocities[i] = sum(scalar_mult(g, dt), sys->velocities[i]);
+    }
+
+    viscosity(sys, dt);
+
+    for (int i = 0; i < N; i++) {
+        sys->prev_positions[i] = sys->positions[i];
+        sys->positions[i] = sum(scalar_mult(sys->velocities[i], dt), sys->positions[i]);
+    }
+
+    adjust_spring(sys, sprs, dt);
+    apply_spring(sys, sprs, dt);
+
+    dd_relaxation(sys, dt);
+
+    for (int i = 0; i < N; i++) {
+        sys->velocities[i] = calc_next_vel(sys->positions[i], sys->prev_positions[i], dt);
+        borders(&sys->positions[i], &sys->velocities[i]);
+
+        DrawText(TextFormat("%0.1f", 1.f / dt), 10, 10, 40, WHITE);
+        DrawCircleV(sys->positions[i], R, color);
+    }
+
+    if (++(*frames) % FPS == 0) {
+        shrink_springs(sprs);
+    }
+}
+
+static void dd_relaxation(ParticleSystem *sys, float dt) {
     for (int i = 0; i < N; i++) {
         float density = 0.0;
         float near_density = 0.0;
@@ -43,7 +83,7 @@ void dd_relaxation(ParticleSystem *sys, float dt) {
     }
 }
 
-void apply_spring(ParticleSystem *sys, Springs *sprs, float dt) {
+static void apply_spring(ParticleSystem *sys, Springs *sprs, float dt) {
     for (int idx = 0; idx < sprs->count; idx++) {
         int i = sprs->is[idx];
         int j = sprs->js[idx];
@@ -64,7 +104,7 @@ void apply_spring(ParticleSystem *sys, Springs *sprs, float dt) {
     }
 }
 
-void adjust_spring(ParticleSystem *sys, Springs *sprs, float dt) {
+static void adjust_spring(ParticleSystem *sys, Springs *sprs, float dt) {
     for (int i = 0; i < N; i++) {
         for (int j = i + 1; j < N; j++) {
             Vector2 dist = diff(sys->positions[i], sys->positions[j]);
@@ -94,18 +134,13 @@ void adjust_spring(ParticleSystem *sys, Springs *sprs, float dt) {
     }
 
     for (int idx = sprs->count - 1; idx >= 0; idx--) {
-        // int i = sprs->is[idx];
-        // int j = sprs->js[idx];
-        
-        // float dist_len = length(diff(sys->positions[i], sys->positions[j]));
-        
         if (sprs->rest_lengths[idx] >= SPRING_THRESHOLD * H) {
             remove_spring(sprs, idx);
         }
     }
 }
 
-void viscosity(ParticleSystem *sys, float dt) {
+static void viscosity(ParticleSystem *sys, float dt) {
     for (int i = 0; i < N; i++) {
         for (int j = i + 1; j < N; j++) {
             Vector2 dist = diff(sys->positions[i], sys->positions[j]);
@@ -125,4 +160,33 @@ void viscosity(ParticleSystem *sys, float dt) {
             }
         }
     }
+}
+
+static void borders(Vector2 *pos, Vector2 *vel) {
+    if (pos->x < R) {
+        pos->x = R;
+        vel->x *= -DAMPING;
+    } else if (pos->x >= X - R) {
+        pos->x = X - R;
+        vel->x *= -DAMPING;
+    }
+
+    if (pos->y < R) {
+        pos->y = R;
+        vel->y *= -DAMPING;
+    } else if (pos->y >= Y - R) {
+        pos->y = Y - R;
+        vel->y *= -DAMPING;
+    }
+}
+
+static Vector2 calc_next_vel(Vector2 pos, Vector2 prev_pos, float dt) {
+    Vector2 pos_diff = diff(pos, prev_pos);
+    Vector2 next_vel = scalar_mult(pos_diff, 1.0f / dt);
+    
+    if (isnan(next_vel.x) || isnan(next_vel.y)) {
+        return (Vector2){0, 0};
+    }
+    
+    return next_vel;
 }

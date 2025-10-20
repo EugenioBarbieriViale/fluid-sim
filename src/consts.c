@@ -5,8 +5,8 @@ const int X = 1000;
 const int Y = 800;
 const int FPS = 60;
 
-// name of kernel file
-const char *KERNEL_FILENAME = "kernel.cl";
+// path to kernel file
+const char *KERNEL_PATH = "kernels/fluid.cl";
 
 // particle system
 const int N = 1000;
@@ -32,3 +32,7 @@ const float GAMMA = 0.1f;       // yield ratio
 const float ALPHA = 0.2f;       // plasticity constant
 const float SIGMA = 0.2f;       // first viscosity constant
 const float BETA = 0.2f;        // second viscosity constant
+
+float rand_float(float low, float high) {
+    return ((float)rand() / (float)(RAND_MAX)) * fabs(low - high) + low;
+}
