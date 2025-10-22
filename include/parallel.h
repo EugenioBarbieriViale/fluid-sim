@@ -13,7 +13,7 @@
 
 #include "host_types.h"
 
-OpenCLState init_opencl(int);
+OpenCLState init_opencl(Constants consts, int show_file);
 void release_opencl(OpenCLState*);
 void parallel_compute(OpenCLState*, ParticleSystem*, Springs*);
 

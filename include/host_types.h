@@ -12,24 +12,24 @@
 #endif
 
 
-// screen dimensions
-extern const int X;
-extern const int Y;
-extern const int FPS;
-
-// number of particles
-extern const int N;
-extern const int MIN_CAPACITY;
-extern const float R;
-
 // color of particles
 extern const Color color;
 
 // path to kernel and header for kernel
 extern const char *KERNEL_PATH;
 
-extern const size_t GLOBAL_WORK_SIZE;
-extern const size_t LOCAL_WORK_SIZE;
+
+typedef struct {
+    int X;
+    int Y;
+    float dt;
+
+    int N;
+    int MIN_CAPACITY;
+    float R;
+} Constants;
+
+Constants init_consts(int);
 
 typedef struct {
     float x;
@@ -53,9 +53,16 @@ typedef struct {
 typedef struct {
     char *source;
     size_t size;
-} Source;
+} KernelSource;
 
 typedef struct {
+    size_t global_work_size;
+    size_t local_work_size;
+} KernelConfig;
+
+typedef struct {
+    KernelConfig config;
+
     cl_device_id device;
     cl_context context;
     cl_command_queue queue;

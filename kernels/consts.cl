@@ -6,17 +6,6 @@ typedef struct {
     float y;
 } vector2;
 
-// screen dimensions
-__constant int X = 1000;
-__constant int Y = 800;
-__constant int FPS = 60;
-__constant float dt = 1.f / FPS;
-
-// particle system
-__constant int N = 1000;
-__constant int MIN_CAPACITY = 64;
-__constant float R = 4.f;
-
 // physics constants
 __constant vector2 g = {0, 9.81f};
 __constant float DAMPING = 0.7f;
@@ -34,6 +23,16 @@ __constant float GAMMA = 0.1f;       // yield ratio
 __constant float ALPHA = 0.2f;       // plasticity constant
 __constant float SIGMA = 0.2f;       // first viscosity constant
 __constant float BETA = 0.2f;        // second viscosity constant
+
+typedef struct {
+    int X;
+    int Y;
+    float dt;
+
+    int N;
+    int MIN_CAPACITY;
+    float R;
+} Constants;
 
 typedef struct {
     vector2 *positions;
