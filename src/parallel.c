@@ -1,7 +1,7 @@
 #include "parallel.h"
 
-static Source read_kernel(int unsigned show) {
-    FILE *fptr = fopen(KERNEL_PATH, "r");
+static Source read_file(const char *file_name, int unsigned show) {
+    FILE *fptr = fopen(file_name, "r");
 
     if (!fptr) {
         fprintf(stderr, "Could not load the kernel\n");
@@ -17,7 +17,7 @@ static Source read_kernel(int unsigned show) {
     s.size = fread(s.source, 1, file_size, fptr);
 
     if (show) {
-        printf("\n--------- Kernel ---------\n");
+        printf("\n------- Input file -------\n");
         printf("%s", s.source);
         printf("----------------------------\n");
     }
@@ -57,7 +57,7 @@ static void show_device_info(cl_device_id device, cl_uint num_devices) {
 
     size_t group_size;
     clGetDeviceInfo(device, CL_DEVICE_MAX_WORK_GROUP_SIZE, sizeof(size_t), &group_size, NULL);
-    printf("Max work-items in a work-group: %zu\n", group_size);
+    printf("Max work group size: %zu\n", group_size);
 
     cl_ulong mem_size;
     clGetDeviceInfo(device, CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(cl_ulong), &mem_size, NULL);
@@ -87,11 +87,8 @@ static void program_log(cl_program program, cl_device_id device) {
     free(program_log);
 }
 
-
-OpenCLState init_opencl(int show_kernel) {
+OpenCLState init_opencl(int show_file) {
     OpenCLState cl_state;
-
-    Source s = read_kernel(show_kernel);
 
     cl_platform_id platform = NULL;
     cl_state.device = NULL;
@@ -109,20 +106,12 @@ OpenCLState init_opencl(int show_kernel) {
     cl_state.queue = clCreateCommandQueueWithProperties(cl_state.context, cl_state.device, 0, &info);
     check_error(info, "clCreateCommandQueueWithProperties");
 
-    // create memory buffers
-    cl_state.pos_mem_obj = clCreateBuffer(cl_state.context, CL_MEM_READ_WRITE, N * sizeof(Vector2), NULL, &info);
+    cl_state.sys_mem_obj = clCreateBuffer(cl_state.context, CL_MEM_READ_WRITE, sizeof(ParticleSystem), NULL, &info);
     check_error(info, "clCreateBuffer");
-    cl_state.prev_pos_mem_obj = clCreateBuffer(cl_state.context, CL_MEM_READ_WRITE, N * sizeof(Vector2), NULL, &info);
-    check_error(info, "clCreateBuffer");
-    cl_state.vel_mem_obj = clCreateBuffer(cl_state.context, CL_MEM_READ_WRITE, N * sizeof(Vector2), NULL, &info);
+    cl_state.sprs_mem_obj = clCreateBuffer(cl_state.context, CL_MEM_READ_WRITE, sizeof(Springs), NULL, &info);
     check_error(info, "clCreateBuffer");
 
-    cl_state.is_mem_obj = clCreateBuffer(cl_state.context, CL_MEM_READ_WRITE, N * sizeof(int), NULL, &info);
-    check_error(info, "clCreateBuffer");
-    cl_state.js_mem_obj = clCreateBuffer(cl_state.context, CL_MEM_READ_WRITE, N * sizeof(int), NULL, &info);
-    check_error(info, "clCreateBuffer");
-    cl_state.rl_mem_obj = clCreateBuffer(cl_state.context, CL_MEM_READ_WRITE, N * sizeof(float), NULL, &info);
-    check_error(info, "clCreateBuffer");
+    Source s = read_file(KERNEL_PATH, show_file);
 
     cl_state.program = clCreateProgramWithSource(
             cl_state.context,
@@ -139,18 +128,10 @@ OpenCLState init_opencl(int show_kernel) {
     cl_state.kernel = clCreateKernel(cl_state.program, "computeNextState", &info);
     check_error(info, "clCreateKernel");
 
-    info = clSetKernelArg(cl_state.kernel, 0, sizeof(cl_mem), (void*)&cl_state.pos_mem_obj);
+    info = clSetKernelArg(cl_state.kernel, 0, sizeof(cl_mem), (void*)&cl_state.sys_mem_obj);
     check_error(info, "clSetKernelArg0");
-    info = clSetKernelArg(cl_state.kernel, 1, sizeof(cl_mem), (void*)&cl_state.prev_pos_mem_obj);
+    info = clSetKernelArg(cl_state.kernel, 1, sizeof(cl_mem), (void*)&cl_state.sprs_mem_obj);
     check_error(info, "clSetKernelArg1");
-    info = clSetKernelArg(cl_state.kernel, 2, sizeof(cl_mem), (void*)&cl_state.vel_mem_obj);
-    check_error(info, "clSetKernelArg2");
-    info = clSetKernelArg(cl_state.kernel, 3, sizeof(cl_mem), (void*)&cl_state.is_mem_obj);
-    check_error(info, "clSetKernelArg3");
-    info = clSetKernelArg(cl_state.kernel, 4, sizeof(cl_mem), (void*)&cl_state.js_mem_obj);
-    check_error(info, "clSetKernelArg4");
-    info = clSetKernelArg(cl_state.kernel, 5, sizeof(cl_mem), (void*)&cl_state.rl_mem_obj);
-    check_error(info, "clSetKernelArg5");
 
     free(s.source);
 
@@ -165,17 +146,9 @@ void release_opencl(OpenCLState *cl_state) {
     info = clReleaseProgram(cl_state->program);
     check_error(info, "clReleaseProgram");
 
-    info = clReleaseMemObject(cl_state->pos_mem_obj);
+    info = clReleaseMemObject(cl_state->sys_mem_obj);
     check_error(info, "clReleaseMemObject");
-    info = clReleaseMemObject(cl_state->prev_pos_mem_obj);
-    check_error(info, "clReleaseMemObject");
-    info = clReleaseMemObject(cl_state->vel_mem_obj);
-    check_error(info, "clReleaseMemObject");
-    info = clReleaseMemObject(cl_state->is_mem_obj);
-    check_error(info, "clReleaseMemObject");
-    info = clReleaseMemObject(cl_state->js_mem_obj);
-    check_error(info, "clReleaseMemObject");
-    info = clReleaseMemObject(cl_state->rl_mem_obj);
+    info = clReleaseMemObject(cl_state->sprs_mem_obj);
     check_error(info, "clReleaseMemObject");
 
     info = clReleaseCommandQueue(cl_state->queue);
@@ -188,38 +161,21 @@ void parallel_compute(OpenCLState *cl_state, ParticleSystem *sys, Springs *sprs)
     cl_int info;
 
     // copy data to buffers
-    info = clEnqueueWriteBuffer(cl_state->queue, cl_state->pos_mem_obj, CL_TRUE, 0, N * sizeof(Vector2), sys->positions, 0, NULL, NULL);
+    info = clEnqueueWriteBuffer(cl_state->queue, cl_state->sys_mem_obj, CL_TRUE, 0, sizeof(ParticleSystem), sys, 0, NULL, NULL);
     check_error(info, "clEnqueueWriteBuffer");
-    info = clEnqueueWriteBuffer(cl_state->queue, cl_state->prev_pos_mem_obj, CL_TRUE, 0, N * sizeof(Vector2), sys->prev_positions, 0, NULL, NULL);
-    check_error(info, "clEnqueueWriteBuffer");
-    info = clEnqueueWriteBuffer(cl_state->queue, cl_state->vel_mem_obj, CL_TRUE, 0, N * sizeof(Vector2), sys->velocities, 0, NULL, NULL);
-    check_error(info, "clEnqueueWriteBuffer");
-
-    info = clEnqueueWriteBuffer(cl_state->queue, cl_state->is_mem_obj, CL_TRUE, 0, N * sizeof(int), sprs->is, 0, NULL, NULL);
-    check_error(info, "clEnqueueWriteBuffer");
-    info = clEnqueueWriteBuffer(cl_state->queue, cl_state->js_mem_obj, CL_TRUE, 0, N * sizeof(int), sprs->js, 0, NULL, NULL);
-    check_error(info, "clEnqueueWriteBuffer");
-    info = clEnqueueWriteBuffer(cl_state->queue, cl_state->rl_mem_obj, CL_TRUE, 0, N * sizeof(float), sprs->rest_lengths, 0, NULL, NULL);
+    info = clEnqueueWriteBuffer(cl_state->queue, cl_state->sprs_mem_obj, CL_TRUE, 0, sizeof(Springs), sprs, 0, NULL, NULL);
     check_error(info, "clEnqueueWriteBuffer");
 
     // execute kernel
     size_t global_work_size = N;
-    size_t local_work_size = 64;
+    // size_t local_work_size = 64;
+    size_t local_work_size = 1;
     info = clEnqueueNDRangeKernel(cl_state->queue, cl_state->kernel, 1, NULL, &global_work_size, &local_work_size, 0, NULL, NULL);
     check_error(info, "clEnqueueNDRangeKernel");
 
     // read results back
-    info = clEnqueueReadBuffer(cl_state->queue, cl_state->pos_mem_obj, CL_TRUE, 0, N * sizeof(Vector2), sys->positions, 0, NULL, NULL);
+    info = clEnqueueReadBuffer(cl_state->queue, cl_state->sys_mem_obj, CL_TRUE, 0, sizeof(ParticleSystem), sys, 0, NULL, NULL);
     check_error(info, "clEnqueueReadBuffer");
-    info = clEnqueueReadBuffer(cl_state->queue, cl_state->prev_pos_mem_obj, CL_TRUE, 0, N * sizeof(Vector2), sys->prev_positions, 0, NULL, NULL);
-    check_error(info, "clEnqueueReadBuffer");
-    info = clEnqueueReadBuffer(cl_state->queue, cl_state->vel_mem_obj, CL_TRUE, 0, N * sizeof(Vector2), sys->velocities, 0, NULL, NULL);
-    check_error(info, "clEnqueueReadBuffer");
-
-    info = clEnqueueReadBuffer(cl_state->queue, cl_state->is_mem_obj, CL_TRUE, 0, N * sizeof(int), sprs->is, 0, NULL, NULL);
-    check_error(info, "clEnqueueReadBuffer");
-    info = clEnqueueReadBuffer(cl_state->queue, cl_state->js_mem_obj, CL_TRUE, 0, N * sizeof(int), sprs->js, 0, NULL, NULL);
-    check_error(info, "clEnqueueReadBuffer");
-    info = clEnqueueReadBuffer(cl_state->queue, cl_state->rl_mem_obj, CL_TRUE, 0, N * sizeof(float), sprs->rest_lengths, 0, NULL, NULL);
+    info = clEnqueueReadBuffer(cl_state->queue, cl_state->sprs_mem_obj, CL_TRUE, 0, sizeof(Springs), sprs, 0, NULL, NULL);
     check_error(info, "clEnqueueReadBuffer");
 }

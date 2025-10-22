@@ -1,7 +1,8 @@
 #ifndef SPRINGS_H
 #define SPRINGS_H
 
-#include "consts.h"
+#include <stdlib.h>
+#include "host_types.h"
 
 void alloc_springs(Springs*, int);
 void free_springs(Springs*);

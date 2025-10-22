@@ -11,7 +11,7 @@
 #include <CL/cl.h>
 #endif
 
-#include "springs.h"
+#include "host_types.h"
 
 OpenCLState init_opencl(int);
 void release_opencl(OpenCLState*);

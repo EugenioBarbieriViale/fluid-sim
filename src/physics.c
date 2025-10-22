@@ -5,8 +5,8 @@ static void apply_spring(ParticleSystem*, Springs*, float);
 static void adjust_spring(ParticleSystem*, Springs*, float);
 static void viscosity(ParticleSystem*, float);
 
-static Vector2 calc_next_vel(Vector2, Vector2, float);
-static void borders(Vector2*, Vector2*);
+static vector2 calc_next_vel(vector2, vector2, float);
+static void borders(vector2*, vector2*);
 
 
 void update(ParticleSystem *sys, Springs *sprs, int *frames, float dt) {
@@ -32,7 +32,7 @@ void update(ParticleSystem *sys, Springs *sprs, int *frames, float dt) {
         borders(&sys->positions[i], &sys->velocities[i]);
 
         DrawText(TextFormat("%0.1f", 1.f / dt), 10, 10, 40, WHITE);
-        DrawCircleV(sys->positions[i], R, color);
+        DrawCircle(sys->positions[i].x, sys->positions[i].y, R, color);
     }
 
     if (++(*frames) % FPS == 0) {
@@ -59,20 +59,20 @@ static void dd_relaxation(ParticleSystem *sys, float dt) {
         float pressure = K * (density - D_0);
         float near_pressure = K_NEAR * near_density;
 
-        Vector2 d_pos = {0.f, 0.f};
+        vector2 d_pos = {0.f, 0.f};
 
         for (int j = 0; j < N; j++) {
             if (i == j) continue;
 
-            Vector2 dist = diff(sys->positions[i], sys->positions[j]);
+            vector2 dist = diff(sys->positions[i], sys->positions[j]);
             float dist_len = length(dist);
 
             if (dist_len < H && dist_len > 1e-4f) {
                 float factor = pow(dt, 2) * (pressure * (1 - dist_len / H) +
                         near_pressure * pow(1 - dist_len / H, 2));
 
-                Vector2 versor = scalar_mult(dist, 1.f / dist_len);
-                Vector2 displacement = scalar_mult(versor, factor);
+                vector2 versor = scalar_mult(dist, 1.f / dist_len);
+                vector2 displacement = scalar_mult(versor, factor);
 
                 sys->positions[j] = sum(sys->positions[j], scalar_mult(displacement, 0.5f));
                 d_pos = diff(d_pos, scalar_mult(displacement, 0.5f));
@@ -88,15 +88,15 @@ static void apply_spring(ParticleSystem *sys, Springs *sprs, float dt) {
         int i = sprs->is[idx];
         int j = sprs->js[idx];
 
-        Vector2 dist = diff(sys->positions[i], sys->positions[j]);
+        vector2 dist = diff(sys->positions[i], sys->positions[j]);
         float dist_len = length(dist);
 
         if (dist_len < H && dist_len > 1e-4f) {
-            Vector2 versor = scalar_mult(dist, 1.f / length(dist));
+            vector2 versor = scalar_mult(dist, 1.f / length(dist));
             float L = sprs->rest_lengths[idx];
 
             float factor = (1 - L / H) * (L - dist_len);
-            Vector2 displacement = scalar_mult(versor, pow(dt, 2) * K_SPRING * factor);
+            vector2 displacement = scalar_mult(versor, pow(dt, 2) * K_SPRING * factor);
 
             sys->positions[i] = diff(sys->positions[i], scalar_mult(displacement, 0.5f));
             sys->positions[j] =  sum(sys->positions[j], scalar_mult(displacement, 0.5f));
@@ -107,7 +107,7 @@ static void apply_spring(ParticleSystem *sys, Springs *sprs, float dt) {
 static void adjust_spring(ParticleSystem *sys, Springs *sprs, float dt) {
     for (int i = 0; i < N; i++) {
         for (int j = i + 1; j < N; j++) {
-            Vector2 dist = diff(sys->positions[i], sys->positions[j]);
+            vector2 dist = diff(sys->positions[i], sys->positions[j]);
             float dist_len = length(dist);
 
             if (dist_len < H && dist_len > 1e-4f) {
@@ -143,16 +143,16 @@ static void adjust_spring(ParticleSystem *sys, Springs *sprs, float dt) {
 static void viscosity(ParticleSystem *sys, float dt) {
     for (int i = 0; i < N; i++) {
         for (int j = i + 1; j < N; j++) {
-            Vector2 dist = diff(sys->positions[i], sys->positions[j]);
+            vector2 dist = diff(sys->positions[i], sys->positions[j]);
             float dist_len = length(dist);
 
             if (dist_len < H && dist_len > 1e-4f) {
-                Vector2 versor = scalar_mult(dist, 1.f / length(dist));
+                vector2 versor = scalar_mult(dist, 1.f / length(dist));
                 float lu = length(sys->velocities[i]) - length(sys->velocities[j]);
 
                 if (lu > 0) {
                     float li = dt * (1 - length(dist) / H) * (SIGMA * lu + BETA * lu * lu);
-                    Vector2 half_impulse = scalar_mult(versor, li * 0.5f);
+                    vector2 half_impulse = scalar_mult(versor, li * 0.5f);
 
                     sys->velocities[i] = diff(sys->velocities[i], half_impulse);
                     sys->velocities[j] =  sum(sys->velocities[j], half_impulse);
@@ -162,7 +162,7 @@ static void viscosity(ParticleSystem *sys, float dt) {
     }
 }
 
-static void borders(Vector2 *pos, Vector2 *vel) {
+static void borders(vector2 *pos, vector2 *vel) {
     if (pos->x < R) {
         pos->x = R;
         vel->x *= -DAMPING;
@@ -180,12 +180,12 @@ static void borders(Vector2 *pos, Vector2 *vel) {
     }
 }
 
-static Vector2 calc_next_vel(Vector2 pos, Vector2 prev_pos, float dt) {
-    Vector2 pos_diff = diff(pos, prev_pos);
-    Vector2 next_vel = scalar_mult(pos_diff, 1.0f / dt);
+static vector2 calc_next_vel(vector2 pos, vector2 prev_pos, float dt) {
+    vector2 pos_diff = diff(pos, prev_pos);
+    vector2 next_vel = scalar_mult(pos_diff, 1.0f / dt);
     
     if (isnan(next_vel.x) || isnan(next_vel.y)) {
-        return (Vector2){0, 0};
+        return (vector2){0, 0};
     }
     
     return next_vel;

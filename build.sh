@@ -4,7 +4,8 @@ set -xe
 
 OS=$(uname -s)
 
-CFILES="src/main.c src/consts.c src/physics.c src/springs.c src/parallel.c"
+# CFILES="src/main.c src/host_types.c src/consts.c src/physics.c src/springs.c src/parallel.c"
+CFILES="src/main.c src/host_types.c src/springs.c src/parallel.c"
 CFLAGS="-I./include -lm -Wall -Wextra"
 
 if [ "$OS" = "Linux" ]; then
