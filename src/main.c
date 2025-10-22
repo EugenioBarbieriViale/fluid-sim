@@ -5,7 +5,7 @@
 #include <raylib.h>
 
 // #include "springs.h" // remember to free springs
-#include "parallel.h"
+#include "host.h"
 
 void alloc_system(ParticleSystem *sys, int N) {
     sys->positions = (vector2*)malloc(N * sizeof(vector2));

@@ -1,4 +1,4 @@
-#include "parallel.h"
+#include "host.h"
 
 static KernelSource read_file(const char *file_name, int unsigned show) {
     FILE *fptr = fopen(file_name, "r");

@@ -26,6 +26,7 @@ __kernel void computeNextState(
 ) {
 
     int id = get_global_id(0);
+    if (id >= c.N) return;
 
     p->velocities[id] = sum(p->velocities[id], scalar_mult(g, c.dt));
     p->positions[id] = sum(p->positions[id], p->velocities[id]);
