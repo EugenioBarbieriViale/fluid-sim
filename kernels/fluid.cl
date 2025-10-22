@@ -1,4 +1,5 @@
 #include "kernels/consts.cl"
+#include "kernels/vect_operations.cl"
 
 void borders(vector2 *pos, vector2 *vel) {
     if (pos->x < R) {
@@ -18,20 +19,11 @@ void borders(vector2 *pos, vector2 *vel) {
     }
 }
 
-__kernel void computeNextState(
-    __global ParticleSystem *p,
-    __global Springs *s
-) {
-
+__kernel void computeNextState(__global ParticleSystem *p, __global Springs *s) {
     int id = get_global_id(0);
 
-    vector2 *vel = &p->velocities[id];
+    p->velocities[id] = sum(p->velocities[id], scalar_mult(g, dt));
+    p->positions[id] = sum(p->positions[id], p->velocities[id]);
 
-    vel->x += g.x * dt;
-    vel->y += g.y * dt;
-
-    p->positions[id].x = p->positions[id].x - vel->x;
-    p->positions[id].y = p->positions[id].y + vel->y;
-
-    borders(&p->positions[id], vel);
+    borders(&p->positions[id], &p->velocities[id]);
 }

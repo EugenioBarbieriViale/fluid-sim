@@ -1,3 +1,6 @@
+#ifndef CONSTS_CL
+#define CONSTS_CL
+
 typedef struct {
     float x;
     float y;
@@ -45,3 +48,5 @@ typedef struct {
     int count;
     int capacity;
 } Springs;
+
+#endif

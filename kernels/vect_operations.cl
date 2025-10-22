@@ -1,8 +1,7 @@
-#ifndef VECT_OPERATIONS_H
-#define VECT_OPERATIONS_H
+#ifndef VECT_OPERATIONS_CL
+#define VECT_OPERATIONS_CL
 
-#include "host_types.h"
-#include <math.h>
+#include "kernels/consts.cl"
 
 static inline vector2 sum(vector2 v, vector2 w) {
     return (vector2){v.x + w.x, v.y + w.y};

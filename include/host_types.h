@@ -28,6 +28,8 @@ extern const Color color;
 // path to kernel and header for kernel
 extern const char *KERNEL_PATH;
 
+extern const size_t GLOBAL_WORK_SIZE;
+extern const size_t LOCAL_WORK_SIZE;
 
 typedef struct {
     float x;

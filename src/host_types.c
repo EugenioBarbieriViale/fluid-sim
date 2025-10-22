@@ -16,6 +16,14 @@ const Color color = GRAY;
 // path to the kernel files
 const char *KERNEL_PATH = "kernels/fluid.cl";
 
+// global work size
+const size_t GLOBAL_WORK_SIZE = N;
+
+// local work size is set to the maximum the device supports
+
+// size_t LOCAL_WORK_SIZE = 64;
+const size_t LOCAL_WORK_SIZE = 1;
+
 float rand_float(float low, float high) {
     return ((float)rand() / (float)(RAND_MAX)) * fabs(low - high) + low;
 }

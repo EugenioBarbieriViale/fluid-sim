@@ -13,8 +13,15 @@ static Source read_file(const char *file_name, int unsigned show) {
     fseek(fptr, 0L, SEEK_SET);
 
     Source s;
-    s.source = (char*)malloc(file_size);
+    s.source = (char*)malloc(file_size + 1);
+
+    if (!s.source) {
+        fprintf(stderr, "Could not allocate memory for the kernel\n");
+        exit(1);
+    }
+
     s.size = fread(s.source, 1, file_size, fptr);
+    s.source[file_size] = '\0';
 
     if (show) {
         printf("\n------- Input file -------\n");
@@ -57,6 +64,7 @@ static void show_device_info(cl_device_id device, cl_uint num_devices) {
 
     size_t group_size;
     clGetDeviceInfo(device, CL_DEVICE_MAX_WORK_GROUP_SIZE, sizeof(size_t), &group_size, NULL);
+    // LOCAL_WORK_SIZE = group_size;
     printf("Max work group size: %zu\n", group_size);
 
     cl_ulong mem_size;
@@ -77,7 +85,14 @@ static void program_log(cl_program program, cl_device_id device) {
     size_t log_len;
     clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG, 0, NULL, &log_len);
 
-    char *program_log = (char*)malloc(log_len);
+    char *program_log = (char*)malloc(log_len + 1);
+
+    if (!program_log) {
+        fprintf(stderr, "Could not allocate memory for program log\n");
+        exit(1);
+    }
+
+    program_log[log_len] = '\0';
 
     clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG, log_len, program_log, NULL);
     printf("\n------- Build log --------\n");
@@ -167,10 +182,8 @@ void parallel_compute(OpenCLState *cl_state, ParticleSystem *sys, Springs *sprs)
     check_error(info, "clEnqueueWriteBuffer");
 
     // execute kernel
-    size_t global_work_size = N;
-    // size_t local_work_size = 64;
-    size_t local_work_size = 1;
-    info = clEnqueueNDRangeKernel(cl_state->queue, cl_state->kernel, 1, NULL, &global_work_size, &local_work_size, 0, NULL, NULL);
+    // info = clEnqueueNDRangeKernel(cl_state->queue, cl_state->kernel, 1, NULL, &GLOBAL_WORK_SIZE, &LOCAL_WORK_SIZE, 0, NULL, NULL);
+    info = clEnqueueNDRangeKernel(cl_state->queue, cl_state->kernel, 1, NULL, &GLOBAL_WORK_SIZE, &LOCAL_WORK_SIZE, 0, NULL, NULL);
     check_error(info, "clEnqueueNDRangeKernel");
 
     // read results back
