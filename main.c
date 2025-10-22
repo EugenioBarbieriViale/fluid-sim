@@ -4,8 +4,8 @@
 #include <time.h>
 #include <raylib.h>
 
-#include "include/vect.h"
-#include "include/consts.h"
+#include "vect.h"
+#include "consts.h"
 
 
 float rand_float(float low, float high) {
@@ -155,7 +155,7 @@ void dd_relaxation(ParticleSystem *sys, float dt) {
 void apply_spring(ParticleSystem *sys, Springs *sprs, float dt) {
     for (int idx = 0; idx < sprs->count; idx++) {
         // printf("cap: %d, cou: %d\n", sprs->capacity, sprs->count);
-        printf("count: %d\n", sprs->count);
+        // printf("count: %d\n", sprs->count);
         
         int i = sprs->is[idx];
         int j = sprs->js[idx];
