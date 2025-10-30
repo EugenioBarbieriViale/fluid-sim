@@ -9,6 +9,8 @@ typedef struct {
 // physics constants
 __constant vector2 g = {0, 9.81f};
 __constant float DAMPING = 0.7f;
+/* __constant vector2 g = {1, 9.81f}; */
+/* __constant float DAMPING = 1.001f; */
 
 // SPH parameters
 __constant float H = 20.f;           // interaction radius
