@@ -5,7 +5,7 @@ set -xe
 OS=$(uname -s)
 
 CFILES="src/main.c src/host_types.c src/host.c"
-CFLAGS="-I./include -lm -Wall -Wextra"
+CFLAGS="-I./include -pg -lm -Wall -Wextra"
 
 if [ "$OS" = "Linux" ]; then
     gcc $CFILES $CFLAGS -lraylib -lOpenCL -lGL -lpthread -ldl -lrt -lX11
@@ -25,6 +25,9 @@ else
 fi
 
 ./a.out
+gprof ./a.out gmon.out > gprof.txt
+
+rm gmon.out
 rm a.out
 
 exit

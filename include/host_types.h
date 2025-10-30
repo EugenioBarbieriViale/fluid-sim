@@ -56,8 +56,9 @@ typedef struct {
 } KernelSource;
 
 typedef struct {
-    size_t global_work_size;
-    size_t local_work_size;
+    size_t n_dims;
+    size_t *global_work_size;
+    size_t *local_work_size;
 } KernelConfig;
 
 typedef struct {
@@ -73,6 +74,6 @@ typedef struct {
     cl_mem sprs_mem_obj;
 } OpenCLState;
 
-float rand_float(float, float);
+float rand_float(float, float); // put directly in main.c 
 
 #endif

@@ -4,6 +4,7 @@
       "/sbin/gcc",
       "-c",
       "-I./include",
+      "-pg",
       "-Wall",
       "-Wextra",
       "src/main.c"
@@ -16,47 +17,25 @@
       "/sbin/gcc",
       "-c",
       "-I./include",
+      "-pg",
       "-Wall",
       "-Wextra",
-      "src/consts.c"
+      "src/host_types.c"
     ],
     "directory": "/home/eu/programming/fluid-sim",
-    "file": "/home/eu/programming/fluid-sim/src/consts.c"
+    "file": "/home/eu/programming/fluid-sim/src/host_types.c"
   },
   {
     "arguments": [
       "/sbin/gcc",
       "-c",
       "-I./include",
+      "-pg",
       "-Wall",
       "-Wextra",
-      "src/physics.c"
+      "src/host.c"
     ],
     "directory": "/home/eu/programming/fluid-sim",
-    "file": "/home/eu/programming/fluid-sim/src/physics.c"
-  },
-  {
-    "arguments": [
-      "/sbin/gcc",
-      "-c",
-      "-I./include",
-      "-Wall",
-      "-Wextra",
-      "src/springs.c"
-    ],
-    "directory": "/home/eu/programming/fluid-sim",
-    "file": "/home/eu/programming/fluid-sim/src/springs.c"
-  },
-  {
-    "arguments": [
-      "/sbin/gcc",
-      "-c",
-      "-I./include",
-      "-Wall",
-      "-Wextra",
-      "src/parallel.c"
-    ],
-    "directory": "/home/eu/programming/fluid-sim",
-    "file": "/home/eu/programming/fluid-sim/src/parallel.c"
+    "file": "/home/eu/programming/fluid-sim/src/host.c"
   }
 ]

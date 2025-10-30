@@ -18,7 +18,7 @@ Constants init_consts(int FPS) {
 const Color color = GRAY;
 
 // path to the kernel files
-const char *KERNEL_PATH = "kernels/fluid.cl";
+const char *KERNEL_PATH = "kernels/kernel.cl";
 
 float rand_float(float low, float high) {
     return ((float)rand() / (float)(RAND_MAX)) * fabs(low - high) + low;

@@ -22,7 +22,8 @@ void free_system(ParticleSystem *sys) {
 void init_system(ParticleSystem *sys, int N, float R, float X, float Y) {
     if (sys->positions && sys->prev_positions && sys->velocities) {
         for (int i = 0; i < N; i++) {
-            sys->positions[i] = (vector2){rand_float(R, X / 2.f - R), rand_float(R, Y - R)};
+            sys->positions[i] = (vector2){rand_float(R, X - R), rand_float(R, Y / 2.f - R)};
+            // sys->positions[i] = (vector2){rand_float(R, X - R), Y / 2.f + rand_float(R, Y / 2.f - R)};
             sys->prev_positions[i] = sys->positions[i];
             sys->velocities[i] = (vector2){0, 0};
         }
