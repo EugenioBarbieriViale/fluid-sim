@@ -3,21 +3,21 @@ Flat profile:
 Each sample counts as 0.01 seconds.
   %   cumulative   self              self     total           
  time   seconds   seconds    calls  Ts/call  Ts/call  name    
-100.08      0.01     0.01                             main
-  0.00      0.01     0.00     2048     0.00     0.00  rand_float
-  0.00      0.01     0.00      503     0.00     0.00  check_error
-  0.00      0.01     0.00       97     0.00     0.00  parallel_compute
-  0.00      0.01     0.00        1     0.00     0.00  alloc_system
-  0.00      0.01     0.00        1     0.00     0.00  free_system
-  0.00      0.01     0.00        1     0.00     0.00  get_kernel_config
-  0.00      0.01     0.00        1     0.00     0.00  init_consts
-  0.00      0.01     0.00        1     0.00     0.00  init_opencl
-  0.00      0.01     0.00        1     0.00     0.00  init_system
-  0.00      0.01     0.00        1     0.00     0.00  program_log
-  0.00      0.01     0.00        1     0.00     0.00  read_file
-  0.00      0.01     0.00        1     0.00     0.00  release_opencl
-  0.00      0.01     0.00        1     0.00     0.00  show_device_info
-  0.00      0.01     0.00        1     0.00     0.00  show_kernel_info
+100.08      0.02     0.02                             main
+  0.00      0.02     0.00     2898     0.00     0.00  check_error
+  0.00      0.02     0.00     2048     0.00     0.00  rand_float
+  0.00      0.02     0.00      576     0.00     0.00  parallel_compute
+  0.00      0.02     0.00        1     0.00     0.00  alloc_system
+  0.00      0.02     0.00        1     0.00     0.00  free_system
+  0.00      0.02     0.00        1     0.00     0.00  get_kernel_config
+  0.00      0.02     0.00        1     0.00     0.00  init_consts
+  0.00      0.02     0.00        1     0.00     0.00  init_opencl
+  0.00      0.02     0.00        1     0.00     0.00  init_system
+  0.00      0.02     0.00        1     0.00     0.00  program_log
+  0.00      0.02     0.00        1     0.00     0.00  read_file
+  0.00      0.02     0.00        1     0.00     0.00  release_opencl
+  0.00      0.02     0.00        1     0.00     0.00  show_device_info
+  0.00      0.02     0.00        1     0.00     0.00  show_kernel_info
 
  %         the percentage of the total running time of the
 time       program used by this function.
@@ -55,12 +55,12 @@ notice and this notice are preserved.
 		     Call graph (explanation follows)
 
 
-granularity: each sample hit covers 2 byte(s) for 99.92% of 0.01 seconds
+granularity: each sample hit covers 2 byte(s) for 49.96% of 0.02 seconds
 
 index % time    self  children    called     name
                                                  <spontaneous>
-[1]    100.0    0.01    0.00                 main [1]
-                0.00    0.00      97/97          parallel_compute [4]
+[1]    100.0    0.02    0.00                 main [1]
+                0.00    0.00     576/576         parallel_compute [4]
                 0.00    0.00       1/1           init_consts [8]
                 0.00    0.00       1/1           alloc_system [5]
                 0.00    0.00       1/1           init_system [10]
@@ -68,17 +68,17 @@ index % time    self  children    called     name
                 0.00    0.00       1/1           release_opencl [13]
                 0.00    0.00       1/1           free_system [6]
 -----------------------------------------------
+                0.00    0.00       6/2898        release_opencl [13]
+                0.00    0.00      12/2898        init_opencl [9]
+                0.00    0.00    2880/2898        parallel_compute [4]
+[2]      0.0    0.00    0.00    2898         check_error [2]
+-----------------------------------------------
                 0.00    0.00    2048/2048        init_system [10]
-[2]      0.0    0.00    0.00    2048         rand_float [2]
+[3]      0.0    0.00    0.00    2048         rand_float [3]
 -----------------------------------------------
-                0.00    0.00       6/503         release_opencl [13]
-                0.00    0.00      12/503         init_opencl [9]
-                0.00    0.00     485/503         parallel_compute [4]
-[3]      0.0    0.00    0.00     503         check_error [3]
------------------------------------------------
-                0.00    0.00      97/97          main [1]
-[4]      0.0    0.00    0.00      97         parallel_compute [4]
-                0.00    0.00     485/503         check_error [3]
+                0.00    0.00     576/576         main [1]
+[4]      0.0    0.00    0.00     576         parallel_compute [4]
+                0.00    0.00    2880/2898        check_error [2]
 -----------------------------------------------
                 0.00    0.00       1/1           main [1]
 [5]      0.0    0.00    0.00       1         alloc_system [5]
@@ -94,7 +94,7 @@ index % time    self  children    called     name
 -----------------------------------------------
                 0.00    0.00       1/1           main [1]
 [9]      0.0    0.00    0.00       1         init_opencl [9]
-                0.00    0.00      12/503         check_error [3]
+                0.00    0.00      12/2898        check_error [2]
                 0.00    0.00       1/1           show_device_info [14]
                 0.00    0.00       1/1           read_file [12]
                 0.00    0.00       1/1           program_log [11]
@@ -103,7 +103,7 @@ index % time    self  children    called     name
 -----------------------------------------------
                 0.00    0.00       1/1           main [1]
 [10]     0.0    0.00    0.00       1         init_system [10]
-                0.00    0.00    2048/2048        rand_float [2]
+                0.00    0.00    2048/2048        rand_float [3]
 -----------------------------------------------
                 0.00    0.00       1/1           init_opencl [9]
 [11]     0.0    0.00    0.00       1         program_log [11]
@@ -113,7 +113,7 @@ index % time    self  children    called     name
 -----------------------------------------------
                 0.00    0.00       1/1           main [1]
 [13]     0.0    0.00    0.00       1         release_opencl [13]
-                0.00    0.00       6/503         check_error [3]
+                0.00    0.00       6/2898        check_error [2]
 -----------------------------------------------
                 0.00    0.00       1/1           init_opencl [9]
 [14]     0.0    0.00    0.00       1         show_device_info [14]
@@ -212,8 +212,8 @@ notice and this notice are preserved.
 
 Index by function name
 
-   [5] alloc_system            [9] init_opencl             [2] rand_float
-   [3] check_error            [10] init_system            [12] read_file
+   [5] alloc_system            [9] init_opencl             [3] rand_float
+   [2] check_error            [10] init_system            [12] read_file
    [6] free_system             [1] main                   [13] release_opencl
    [7] get_kernel_config       [4] parallel_compute       [14] show_device_info
    [8] init_consts            [11] program_log            [15] show_kernel_info
