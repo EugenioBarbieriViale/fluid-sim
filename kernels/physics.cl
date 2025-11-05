@@ -22,7 +22,7 @@ void dd_relaxation(int i, __global ParticleSystem *sys, int N, float dt) {
     vector2 d_pos = {0.f, 0.f};
 
     for (int j = 0; j < N; j++) {
-        if (i == j) return;
+        if (i == j) continue;
 
         vector2 dist = diff(sys->positions[i], sys->positions[j]);
         float dist_len = length(dist);

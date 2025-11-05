@@ -167,7 +167,12 @@ OpenCLState init_opencl(Constants consts, int show_file) {
 
     cl_state.context = clCreateContext(NULL, 1, &cl_state.device, NULL, NULL, &info);
     check_error(info, "clCreateContext");
+
+#if CL_TARGET_OPENCL_VERSION >= 300
     cl_state.queue = clCreateCommandQueueWithProperties(cl_state.context, cl_state.device, 0, &info);
+#else
+    cl_state.queue = clCreateCommandQueue(cl_state.context, cl_state.device, 0, &info);
+#endif
     check_error(info, "clCreateCommandQueueWithProperties");
 
     cl_state.sys_mem_obj = clCreateBuffer(cl_state.context, CL_MEM_READ_WRITE, sizeof(ParticleSystem), NULL, &info);

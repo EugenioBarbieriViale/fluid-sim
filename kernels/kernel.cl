@@ -23,6 +23,7 @@ void borders(vector2 *pos, vector2 *vel, int X, int Y, float R) {
 __kernel void computeNextState(
     __global ParticleSystem *sys,
     __global Springs *sprs,
+    /* __global vector2 *dpos, */
     Constants c
 ) {
 
