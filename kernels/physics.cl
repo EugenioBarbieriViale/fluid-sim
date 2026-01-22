@@ -8,7 +8,7 @@ void dd_relaxation(int i, __global ParticleSystem *sys, int N, float dt) {
     for (int j = 0; j < N; j++) {
         if (i == j) continue;
 
-        float dist_len = length(diff(sys->positions[i], sys->positions[j]));
+        float dist_len = v_length(diff(sys->positions[i], sys->positions[j]));
 
         if (dist_len < H) {
             density += pow(1 - dist_len / H, 2);
@@ -25,7 +25,7 @@ void dd_relaxation(int i, __global ParticleSystem *sys, int N, float dt) {
         if (i == j) continue;
 
         vector2 dist = diff(sys->positions[i], sys->positions[j]);
-        float dist_len = length(dist);
+        float dist_len = v_length(dist);
 
         if (dist_len < H && dist_len > 1e-4f) {
             float factor = pow(dt, 2) * (pressure * (1 - dist_len / H) +

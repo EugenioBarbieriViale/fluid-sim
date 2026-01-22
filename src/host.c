@@ -43,6 +43,8 @@ static KernelConfig get_kernel_config(size_t n_dims, int N, cl_device_id device)
     size_t group_size;
     clGetDeviceInfo(device, CL_DEVICE_MAX_WORK_GROUP_SIZE, sizeof(size_t), &group_size, NULL);
 
+    // if (gloal)
+
     if (n_dims == 1 && group_size > (size_t)N) {
         group_size = (size_t)N;
     }

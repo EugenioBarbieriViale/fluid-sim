@@ -15,7 +15,7 @@ static inline vector2 scalar_mult(vector2 v, float s) {
 	return (vector2){v.x * s, v.y * s};
 }
 
-static inline float length(vector2 v) {
+static inline float v_length(vector2 v) {
     return (float)sqrt(v.x*v.x + v.y*v.y);
 }
 
